@@ -4,7 +4,7 @@ const { expect } = require('chai')
 const fs = require('fs')
 const path = require('path')
 
-describe('1. Instance', () => {
+describe('1. Instance with Dockerfile', () => {
   describe('1.1: Simple Docker Compose File', () => {
     const dockerComposeFilePath = path.join(__dirname, '../repos/compose-test-repo-1.1/docker-compose.yml')
     const dockerComposeFile = fs.readFileSync(dockerComposeFilePath).toString()
@@ -20,8 +20,8 @@ describe('1. Instance', () => {
       return parse(dockerComposeFile)
       .then(({ results: services }) => {
         expect(services).to.have.lengthOf(1)
-        expect(services[0]).to.be.an.object
-        expect(services[0].buildDockerFilePath).to.equal('/Dockerfile')
+        expect(services[0].contextVersion).to.be.an.object
+        expect(services[0].contextVersion.buildDockerfilePath).to.equal('/Dockerfile')
       })
     })
 
@@ -30,9 +30,9 @@ describe('1. Instance', () => {
       .then(({ results: services }) => {
         expect(services).to.have.lengthOf(1)
         expect(services).to.be.an.object
-        expect(services[0].ports).to.be.an.array
-        expect(services[0].ports[0]).to.be.a.number
-        expect(services[0].ports[0]).to.equal(7890)
+        expect(services[0].instance.ports).to.be.an.array
+        expect(services[0].instance.ports[0]).to.be.a.number
+        expect(services[0].instance.ports[0]).to.equal(7890)
       })
     })
   })
@@ -46,7 +46,7 @@ describe('1. Instance', () => {
       .then(({ results: services }) => {
         expect(services).to.have.lengthOf(1)
         expect(services).to.be.an.object
-        expect(services[0].buildDockerFilePath).to.equal('/src/Dockerfile')
+        expect(services[0].contextVersion.buildDockerfilePath).to.equal('/src/Dockerfile')
       })
     })
 
@@ -54,8 +54,8 @@ describe('1. Instance', () => {
       return parse(dockerComposeFile)
       .then(({ results: services }) => {
         expect(services).to.have.lengthOf(1)
-        expect(services[0]).to.be.an.object
-        expect(services[0].containerStartCommand).to.equal('node index.js')
+        expect(services[0].instance).to.be.an.object
+        expect(services[0].instance.containerStartCommand).to.equal('node index.js')
       })
     })
 
@@ -63,8 +63,8 @@ describe('1. Instance', () => {
       return parse(dockerComposeFile)
       .then(({ results: services }) => {
         expect(services).to.have.lengthOf(1)
-        expect(services[0]).to.be.an.object
-        expect(services[0].envs).to.deep.equal([
+        expect(services[0].instance).to.be.an.object
+        expect(services[0].instance.envs).to.deep.equal([
           'NODE_ENV=development',
           'SHOW=true',
           'HELLO=678'
@@ -76,10 +76,10 @@ describe('1. Instance', () => {
       return parse(dockerComposeFile)
       .then(({ results: services }) => {
         expect(services).to.have.lengthOf(1)
-        expect(services[0]).to.be.an.object
-        expect(services[0].ports).to.be.an.array
-        expect(services[0].ports[0]).to.be.a.number
-        expect(services[0].ports[0]).to.equal(5000)
+        expect(services[0].instance).to.be.an.object
+        expect(services[0].instance.ports).to.be.an.array
+        expect(services[0].instance.ports[0]).to.be.a.number
+        expect(services[0].instance.ports[0]).to.equal(5000)
       })
     })
   })
@@ -92,8 +92,8 @@ describe('1. Instance', () => {
       return parse(dockerComposeFile)
       .then(({ results: services }) => {
         expect(services).to.have.lengthOf(1)
-        expect(services[0]).to.be.an.object
-        expect(services[0].buildDockerFilePath).to.equal('/src/not-dockerfile.Dockerfile')
+        expect(services[0].contextVersion).to.be.an.object
+        expect(services[0].contextVersion.buildDockerfilePath).to.equal('/src/not-dockerfile.Dockerfile')
       })
     })
 
@@ -101,8 +101,8 @@ describe('1. Instance', () => {
       return parse(dockerComposeFile)
       .then(({ results: services }) => {
         expect(services).to.have.lengthOf(1)
-        expect(services[0]).to.be.an.object
-        expect(services[0].containerStartCommand).to.equal('node index.js')
+        expect(services[0].instance).to.be.an.object
+        expect(services[0].instance.containerStartCommand).to.equal('node index.js')
       })
     })
 
@@ -110,10 +110,18 @@ describe('1. Instance', () => {
       return parse(dockerComposeFile)
       .then(({ results: services }) => {
         expect(services).to.have.lengthOf(1)
-        expect(services[0]).to.be.an.object
-        expect(services[0].ports).to.be.an.array
-        expect(services[0].ports).to.deep.equal([1000, 2000, 3000, 4000])
+        expect(services[0].instance).to.be.an.object
+        expect(services[0].instance.ports).to.be.an.array
+        expect(services[0].instance.ports).to.deep.equal([1000, 2000, 3000, 4000])
       })
     })
   })
+})
+
+describe('2. Instance with Image', () => {
+  // TODO: Test context-version
+})
+
+describe('3. Multiple Instances with linking', () => {
+  // TODO: Test ENVs
 })
