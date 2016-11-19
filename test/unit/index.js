@@ -64,7 +64,7 @@ describe('1. Instance with Dockerfile', () => {
       .then(({ results: services }) => {
         expect(services).to.have.lengthOf(1)
         expect(services[0].instance).to.be.an.object
-        expect(services[0].instance.envs).to.deep.equal([
+        expect(services[0].instance.env).to.deep.equal([
           'NODE_ENV=development',
           'SHOW=true',
           'HELLO=678'
@@ -119,7 +119,52 @@ describe('1. Instance with Dockerfile', () => {
 })
 
 describe('2. Instance with Image', () => {
-  // TODO: Test context-version
+  describe('2.1', () => {
+    const dockerComposeFilePath = path.join(__dirname, '../repos/compose-test-repo-2.1/docker-compose.yml')
+    const dockerComposeFile = fs.readFileSync(dockerComposeFilePath).toString()
+
+    it('should not return a `dockerBuildPath`', () => {
+      return parse(dockerComposeFile)
+      .then(({ results: services }) => {
+        expect(services).to.have.lengthOf(1)
+        expect(services[0].contextVersion).to.be.an.object
+        expect(services[0].contextVersion).to.not.have.property('buildDockerfilePath')
+      })
+    })
+
+    it('should return a `files` object', () => {
+      return parse(dockerComposeFile)
+      .then(({ results: services }) => {
+        expect(services).to.have.lengthOf(1)
+        expect(services[0].files).to.be.an.object
+        const files = services[0].files
+        expect(files).to.have.property('/Dockerfile')
+        expect(files['/Dockerfile'].body).to.match(/FROM/)
+        expect(files['/Dockerfile'].body).to.match(/dtestops\/mysql:5.7/)
+      })
+    })
+
+    it('should the environment variables', () => {
+      return parse(dockerComposeFile)
+      .then(({ results: services }) => {
+        expect(services).to.have.lengthOf(1)
+        expect(services[0].instance).to.be.an.object
+        expect(services[0].instance.env).to.deep.equal([
+          'MYSQL_ROOT_PASSWORD=secret'
+        ])
+      })
+    })
+
+    it('should provide the correct warnings', () => {
+      return parse(dockerComposeFile)
+      .then(({ results: services }) => {
+        const warnings = services[0].warnings
+        expect(warnings).to.be.an.array
+        expect(warnings[0].message).to.match(/keys.*specified/)
+        expect(warnings[0].keys).to.deep.equal(['container_name', 'hostname', 'volumes'])
+      })
+    })
+  })
 })
 
 describe('3. Multiple Instances with linking', () => {

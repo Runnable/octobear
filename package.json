@@ -11,7 +11,8 @@
     "coverage": "NODE_PATH=./lib NODE_ENV=test istanbul cover _mocha -- --recursive test && npm run coverage-check",
     "coverage-unit": "NODE_PATH=./lib NODE_ENV=test istanbul cover _mocha --dir coverage-unit -- --recursive test/unit",
     "lint": "standard --verbose",
-    "test-unit": "NODE_PATH=./lib NODE_ENV=test mocha --recursive test/unit/"
+    "test-unit": "NODE_PATH=./lib NODE_ENV=test mocha --recursive test/unit/",
+    "test-functional": "NODE_PATH=./lib NODE_ENV=test mocha --recursive test/functional/"
   },
   "standard": {
     "globals": [
@@ -28,11 +29,15 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@runnable/api-client": "^9.2.5",
     "chai": "^3.5.0",
     "istanbul": "^0.4.5",
+    "loadenv": "^2.2.0",
     "mocha": "^3.1.2",
     "mocha-parallel-tests": "^1.2.3",
-    "standard": "^8.5.0"
+    "sinon": "^1.17.6",
+    "standard": "^8.5.0",
+    "uuid": "^3.0.0"
   },
   "dependencies": {
     "bluebird": "^3.4.6",
