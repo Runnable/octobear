@@ -30,7 +30,6 @@
     ]
   },
   "author": "",
-  "license": "ISC",
   "devDependencies": {
     "@runnable/api-client": "^9.2.5",
     "chai": "^3.5.0",

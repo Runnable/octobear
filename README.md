@@ -14,8 +14,8 @@ const octobear = require('@runnable/octobear')
 octobear.parse({
   dockerComposeFileString: String, // String for `docker-comopse.yml`
   repositoryName: String, // Name or repository. Used for naming the instances (Doesn't have to  correlate 1-to-1)
-  ownerUsername: String, // User's github username. Used for pre-instance creationt hostname generation
-  userContentDomain: String // Runnable API user content domain. Used for pre-instance creationt hostname generation
+  ownerUsername: String, // User's github username. Used for pre-instance creation hostname generation
+  userContentDomain: String // Runnable API user content domain. Used for pre-instance creation hostname generation
 })
 .then(results => )
 ```
