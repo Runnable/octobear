@@ -3,3 +3,6 @@ coverage-unit
 coverage-functional
 *.log
 node_modules
+
+# Access Token are stored here
+.env.test

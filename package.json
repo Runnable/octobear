@@ -14,7 +14,7 @@
     "lint": "standard --verbose",
     "test-unit": "NODE_PATH=./lib NODE_ENV=test mocha --recursive test/unit/",
     "test-functional": "NODE_PATH=./lib NODE_ENV=test mocha --recursive test/functional/",
-    "test-integration": "NODE_PATH=./lib NODE_ENV=test mocha-parallel-tests test/integration/**/*.js --timeout 10000 --max-parallel 10"
+    "test-integration": "NODE_PATH=./lib NODE_ENV=test mocha-parallel-tests test/integration/**/*.js --timeout 30000 --max-parallel 10"
   },
   "standard": {
     "globals": [
