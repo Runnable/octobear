@@ -4,8 +4,6 @@ const Promise = require('bluebird')
 const Runnable = require('@runnable/api-client')
 const uuid = require('uuid')
 
-const randomInt = Math.floor(Math.random() * 1000)
-
 // Helper method
 const promisifyClientModel = (obj) => {
   const hasProp = {}.hasOwnProperty
@@ -30,9 +28,6 @@ const promisifyClientModel = (obj) => {
   }
   return obj
 }
-
-// Replace Name
-const sanitizeName = x => x.replace(/[^a-zA-Z0-9]/g, '-')
 
 const client = new Runnable(process.env.API_URL, { userContentDomain: process.env.USER_CONTENT_DOMAIN })
 promisifyClientModel(client)

@@ -4,7 +4,7 @@ const { parse } = require('index')
 const { expect } = require('chai')
 const fs = require('fs')
 const path = require('path')
-const sanitizeName = require('../util').sanitaizeName
+const sanitizeName = require('../util').sanitizeName
 
 const userContentDomain = 'runnable.ninja'
 const ownerUsername = process.env.GITHUB_USERNAME
@@ -137,7 +137,7 @@ describe('1. Instance with Dockerfile', () => {
 
     it('should return the correct `buildDockerfilePath`', () => {
       expect(services).to.have.deep.property('[0].contextVersion.buildDockerfilePath')
-      expect(services[0].contextVersion.buildDockerfilePath).to.equal('/src/Dockerfile')
+      expect(services[0].contextVersion.buildDockerfilePath).to.equal('/src/not-so-dockerfile.Dockerfile')
     })
   })
 })

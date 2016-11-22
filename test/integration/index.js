@@ -1,4 +1,5 @@
 'use strict'
+require('loadenv')()
 const Promise = require('bluebird')
 const { parse } = require('index')
 // const { expect } = require('chai')
