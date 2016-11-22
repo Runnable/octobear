@@ -17,7 +17,7 @@ describe('1. Instance with Dockerfile', () => {
     let services
 
     before(() => {
-      return parse({ dockerComposeFileString, dockerComposeFilePath, repositoryName, userContentDomain, ownerUsername })
+      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername })
       .then(({ results: servicesResults }) => {
         services = servicesResults
       })
@@ -43,7 +43,7 @@ describe('1. Instance with Dockerfile', () => {
     let services
 
     before(() => {
-      return parse({ dockerComposeFileString, dockerComposeFilePath, repositoryName, userContentDomain, ownerUsername })
+      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername })
       .then(({ results: servicesResults }) => {
         services = servicesResults
       })
@@ -88,7 +88,7 @@ describe('1. Instance with Dockerfile', () => {
     let services
 
     before(() => {
-      return parse({ dockerComposeFileString, dockerComposeFilePath, repositoryName, userContentDomain, ownerUsername })
+      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername })
       .then(({ results: servicesResults }) => {
         services = servicesResults
       })
@@ -121,7 +121,7 @@ describe('1. Instance with Dockerfile', () => {
     let services
 
     before(() => {
-      return parse({ dockerComposeFileString, dockerComposeFilePath, repositoryName, userContentDomain, ownerUsername })
+      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername })
       .then(({ results: servicesResults }) => {
         services = servicesResults
       })
@@ -147,7 +147,7 @@ describe('2. Instance with Image', () => {
     let services
 
     before(() => {
-      return parse({ dockerComposeFileString, dockerComposeFilePath, repositoryName, userContentDomain, ownerUsername })
+      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername })
       .then(({ results: servicesResults }) => {
         services = servicesResults
       })
@@ -195,7 +195,7 @@ describe('3. Multiple Instances with linking', () => {
     let services
 
     before(() => {
-      return parse({ dockerComposeFileString, dockerComposeFilePath, repositoryName, userContentDomain, ownerUsername })
+      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername })
       .then(({ results: servicesResults }) => {
         services = servicesResults
       })
@@ -256,7 +256,7 @@ describe('3. Multiple Instances with linking', () => {
     let services
 
     before(() => {
-      return parse({ dockerComposeFileString, dockerComposeFilePath, repositoryName, userContentDomain, ownerUsername })
+      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername })
       .then(({ results: servicesResults }) => {
         services = servicesResults
       })
@@ -284,7 +284,7 @@ describe('3. Multiple Instances with linking', () => {
     let services
 
     before(() => {
-      return parse({ dockerComposeFileString, dockerComposeFilePath, repositoryName, userContentDomain, ownerUsername })
+      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername })
       .then(({ results: servicesResults }) => {
         services = servicesResults
       })
@@ -304,6 +304,7 @@ describe('3. Multiple Instances with linking', () => {
         ])
       })
     })
+
     describe('Secondary Instance', () => {
       it('should return the correct ENVs', () => {
         const hostname = `${sanitizeName(repositoryName)}-redis-staging-${ownerUsername.toLowerCase()}.${userContentDomain}`
