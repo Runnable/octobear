@@ -1,3 +1,5 @@
 coverage
+coverage-unit
+coverage-functional
 *.log
 node_modules

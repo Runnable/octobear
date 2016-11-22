@@ -170,7 +170,7 @@ const createContextVersionAndInstance = ({ instanceSpec, contextVersionSpec, fil
     .then(() => {
       const opts = Object.assign({
         masterPod: true,
-        name: sanitizeName(repo) + '--' + randomInt,
+        // name: ,
         ipWhitelist: {
           enabled: false
         },
