@@ -113,6 +113,30 @@ describe('1. Instance with Dockerfile', () => {
       expect(services[0].instance.ports).to.deep.equal([1000, 2000, 3000, 4000])
     })
   })
+
+  describe('1.4: Dockerfile with compose file in different directory', () => {
+    const repositoryName = 'compose-test-repo-1.4'
+    const dockerComposeFilePath = path.join(__dirname, `../repos/${repositoryName}/docker/compose.yml`)
+    const dockerComposeFileString = fs.readFileSync(dockerComposeFilePath).toString()
+    let services
+
+    before(() => {
+      return parse({ dockerComposeFileString, dockerComposeFilePath, repositoryName, userContentDomain, ownerUsername })
+      .then(({ results: servicesResults }) => {
+        services = servicesResults
+      })
+    })
+
+    it('should have the right number of services', () => {
+      expect(services).to.have.lengthOf(1)
+    })
+
+    it('should return the correct `buildDockerfilePath`', () => {
+      expect(services).to.have.deep.property('[0].contextVersion.buildDockerfilePath')
+      expect(services[0].contextVersion.buildDockerfilePath).to.equal('/src/Dockerfile')
+    })
+  })
+
 })
 
 describe('2. Instance with Image', () => {
@@ -182,6 +206,10 @@ describe('3. Multiple Instances with linking', () => {
     })
 
     describe('Main Instance', () => {
+      it('should have a `main` container', () => {
+        expect(services).to.have.deep.property('[0].metadata.isMain', true)
+      })
+
       it('should return a `dockerBuildPath`', () => {
         expect(services).to.have.deep.property('[0].contextVersion.buildDockerfilePath')
         expect(services[0].contextVersion.buildDockerfilePath).to.equal('/Dockerfile')
@@ -193,10 +221,96 @@ describe('3. Multiple Instances with linking', () => {
       })
 
       it('should return the correct ENVs', () => {
-        const hostname = `${ sanitizeName(repositoryName) }-db-staging-${ownerUsername.toLowerCase()}.${userContentDomain}`
+        const hostname = `${sanitizeName(repositoryName)}-db-staging-${ownerUsername.toLowerCase()}.${userContentDomain}`
         expect(services).to.have.deep.property('[0].instance.env')
         expect(services[0].instance.env).to.deep.equal([
           `DB_PORT=tcp://${hostname}:5432`
+        ])
+      })
+    })
+
+    describe('Secondary Instance', () => {
+      it('should not a be a `main` container', () => {
+        expect(services).to.have.deep.property('[1].metadata.isMain', false)
+      })
+
+      it('should have the required files', () => {
+        expect(services).to.have.deep.property('[1].files')
+        const files = services[1].files
+        expect(files).to.have.property('/Dockerfile')
+        expect(files['/Dockerfile'].body).to.match(/FROM/)
+        expect(files['/Dockerfile'].body).to.match(/postgres/)
+      })
+
+      it('should return the right context version properties', () => {
+        expect(services).to.have.deep.property('[1].contextVersion.advanced')
+        expect(services[1].contextVersion.advanced).to.equal(true)
+      })
+    })
+  })
+
+  describe('3.2: Hello Node `depends_on`', () => {
+    const repositoryName = 'compose-test-repo-3.2'
+    const dockerComposeFilePath = path.join(__dirname, `../repos/${repositoryName}/docker-compose.yml`)
+    const dockerComposeFileString = fs.readFileSync(dockerComposeFilePath).toString()
+    let services
+
+    before(() => {
+      return parse({ dockerComposeFileString, dockerComposeFilePath, repositoryName, userContentDomain, ownerUsername })
+      .then(({ results: servicesResults }) => {
+        services = servicesResults
+      })
+    })
+
+    it('should have 2 services', () => {
+      expect(services).to.have.lengthOf(2)
+    })
+
+    describe('Main Instance', () => {
+      it('should return the correct ENVs', () => {
+        const hostname = `${sanitizeName(repositoryName)}-db-staging-${ownerUsername.toLowerCase()}.${userContentDomain}`
+        expect(services).to.have.deep.property('[0].instance.env')
+        expect(services[0].instance.env).to.deep.equal([
+          `RETHINKDB=${hostname}`
+        ])
+      })
+    })
+  })
+
+  describe('3.3: Strict dependencies', () => {
+    const repositoryName = 'compose-test-repo-3.3'
+    const dockerComposeFilePath = path.join(__dirname, `../repos/${repositoryName}/docker-compose.yml`)
+    const dockerComposeFileString = fs.readFileSync(dockerComposeFilePath).toString()
+    let services
+
+    before(() => {
+      return parse({ dockerComposeFileString, dockerComposeFilePath, repositoryName, userContentDomain, ownerUsername })
+      .then(({ results: servicesResults }) => {
+        services = servicesResults
+      })
+    })
+
+    it('should have 3 services', () => {
+      expect(services).to.have.lengthOf(3)
+    })
+
+    describe('Main Instance', () => {
+      it('should return the correct ENVs', () => {
+        const hostname = `${sanitizeName(repositoryName)}-rethinkdb-staging-${ownerUsername.toLowerCase()}.${userContentDomain}`
+        expect(services).to.have.deep.property('[0].instance.env')
+        expect(services[0].instance.env).to.deep.equal([
+          `RETHINKDB=${hostname}`,
+          `REDIS=redis`
+        ])
+      })
+    })
+    describe('Secondary Instance', () => {
+      it('should return the correct ENVs', () => {
+        const hostname = `${sanitizeName(repositoryName)}-redis-staging-${ownerUsername.toLowerCase()}.${userContentDomain}`
+        expect(services).to.have.deep.property('[0].instance.env')
+        expect(services[1].instance.env).to.deep.equal([
+          `RETHINKDB=rethinkdb`,
+          `REDIS=${hostname}`
         ])
       })
     })
