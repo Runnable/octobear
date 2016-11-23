@@ -5,6 +5,42 @@ const Parser = require('parser')
 
 describe('Parser', () => {
   describe('#buildDockerfilePathParser', () => {
+    let warnings
+    let build
+    beforeEach(() => {
+      build = '.'
+      warnings = []
+    })
+
+    it('should return `null` if there is no build', () => {
+      build = null
+      const result = Parser.buildDockerfilePathParser({ build, warnings })
+      expect(result).to.equal(null)
+    })
+
+    it('should throw a warning if build args are passed', () => {
+      build = { args: ['WOW=1'], context: '/src' }
+      Parser.buildDockerfilePathParser({ build, warnings })
+      expect(warnings[0].args).to.deep.equal(['WOW=1'])
+    })
+
+    it('should return `/Dockerfile` if passed "."', () => {
+      build = { args: ['WOW=1'], context: '/src' }
+      const result = Parser.buildDockerfilePathParser({ build, warnings })
+      expect(result).to.equal('/src/Dockerfile')
+    })
+
+    it('should return `/src/deep/wow/Dockerfile`', () => {
+      build = { context: '/src/deep/wow' }
+      const result = Parser.buildDockerfilePathParser({ build, warnings })
+      expect(result).to.equal('/src/deep/wow/Dockerfile')
+    })
+
+    it('should return `/src/some-other-name.Dockerfile`', () => {
+      build = { context: '/src/deep/wow', dockerfile: 'wow-thats-awesome.Dockerfile' }
+      const result = Parser.buildDockerfilePathParser({ build, warnings })
+      expect(result).to.equal('/src/deep/wow/wow-thats-awesome.Dockerfile')
+    })
   })
 
   describe('#portsParser', () => {
