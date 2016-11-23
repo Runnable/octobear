@@ -114,7 +114,7 @@ describe('1. Instance with Dockerfile', () => {
 
     it('should return the correct ports', () => {
       expect(services).to.have.deep.property('[0].instance.ports')
-      expect(services[0].instance.ports).to.deep.equal([1000, 2000, 3000, 4000, 5000, 6000])
+      expect(services[0].instance.ports).to.deep.equal([5000])
     })
   })
 
