@@ -1,3 +1,9 @@
 coverage
+coverage-unit
+coverage-functional
 *.log
 node_modules
+.DS_Store
+
+# Access Token and other secrets are stored here
+.env.test
