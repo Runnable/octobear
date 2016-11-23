@@ -5,5 +5,5 @@ coverage-functional
 node_modules
 .DS_Store
 
-# Access Token are stored here
+# Access Token and other secrets are stored here
 .env.test
