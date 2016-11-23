@@ -2,6 +2,7 @@
 const expect = require('chai').expect
 
 const Parser = require('parser')
+const Warning = require('warning')
 
 describe('Parser', () => {
   describe('#buildDockerfilePathParser', () => {
@@ -9,7 +10,7 @@ describe('Parser', () => {
     let build
     beforeEach(() => {
       build = '.'
-      warnings = []
+      warnings = new Warning()
     })
 
     it('should return `null` if there is no build', () => {
@@ -21,7 +22,7 @@ describe('Parser', () => {
     it('should throw a warning if build args are passed', () => {
       build = { args: ['WOW=1'], context: '/src' }
       Parser.buildDockerfilePathParser({ build, warnings })
-      expect(warnings[0].args).to.deep.equal(['WOW=1'])
+      expect(Array.from(warnings)[0].args).to.deep.equal(['WOW=1'])
     })
 
     it('should return `/Dockerfile` if passed "."', () => {
@@ -48,7 +49,7 @@ describe('Parser', () => {
     let ports
     beforeEach(() => {
       ports = ['80']
-      warnings = []
+      warnings = new Warning()
     })
 
     it('should return an empty array if no ports are passed', () => {
@@ -69,8 +70,9 @@ describe('Parser', () => {
       ports.push(badPort)
       const result = Parser.portsParser({ ports, warnings })
       expect(result).to.deep.equal([80])
-      expect(warnings).to.have.lengthOf(1)
-      expect(warnings[0].port).to.equal(badPort)
+      let warningsArray = Array.from(warnings)
+      expect(warningsArray).to.have.lengthOf(1)
+      expect(warningsArray[0].port).to.equal(badPort)
     })
 
     it('should add ports with a colon (80:80)', () => {
@@ -85,8 +87,9 @@ describe('Parser', () => {
       ports.push(badPort)
       const result = Parser.portsParser({ ports, warnings })
       expect(result).to.deep.equal([80])
-      expect(warnings).to.have.lengthOf(1)
-      expect(warnings[0].ports).to.deep.equal(['9000', '5000'])
+      let warningsArray = Array.from(warnings)
+      expect(warningsArray).to.have.lengthOf(1)
+      expect(warningsArray[0].ports).to.deep.equal(['9000', '5000'])
     })
   })
 
