@@ -134,8 +134,7 @@ describe('Parser', () => {
       expect(result[0]).to.equal(`SENTRY_DSN=https://5f31608fe1c24d2cbbf384e412c0e8c3:77adde0716644851b8d963af9d8b753e@${newHost}/98425`)
     })
 
-    // Not currently supported because of URL parsing
-    xit('should correctly replace a postgres host', () => {
+    it('should correctly replace a postgres host', () => {
       const env = ['ZOOKEEPER=zookeeper:2181']
       const newHost = 'compose-test-repo-3-2-db-staging-runnabletest.runnable.ninja'
       const hostnames = { zookeeper: newHost }
