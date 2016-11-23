@@ -8,6 +8,50 @@ describe('Parser', () => {
   })
 
   describe('#portsParser', () => {
+    let warnings
+    let ports
+    beforeEach(() => {
+      ports = ['80']
+      warnings = []
+    })
+
+    it('should return an empty array if no ports are passed', () => {
+      ports = null
+      const result = Parser.portsParser({ ports, warnings })
+      expect(result).to.deep.equal([])
+    })
+
+    it('should add ports that are numbers', () => {
+      const badPort = '9000'
+      ports.push(badPort)
+      const result = Parser.portsParser({ ports, warnings })
+      expect(result).to.deep.equal([80, 9000])
+    })
+
+    it('should not add ports that are not numbers', () => {
+      const badPort = 'asdfasd'
+      ports.push(badPort)
+      const result = Parser.portsParser({ ports, warnings })
+      expect(result).to.deep.equal([80])
+      expect(warnings).to.have.lengthOf(1)
+      expect(warnings[0].port).to.equal(badPort)
+    })
+
+    it('should add ports with a colon (80:80)', () => {
+      const badPort = '9000:9000'
+      ports.push(badPort)
+      const result = Parser.portsParser({ ports, warnings })
+      expect(result).to.deep.equal([80, 9000])
+    })
+
+    it('should throw a warning for an unsupported port (9000:80)', () => {
+      const badPort = '9000:5000'
+      ports.push(badPort)
+      const result = Parser.portsParser({ ports, warnings })
+      expect(result).to.deep.equal([80])
+      expect(warnings).to.have.lengthOf(1)
+      expect(warnings[0].ports).to.deep.equal(['9000', '5000'])
+    })
   })
 
   describe('#envReplacementParser', () => {
