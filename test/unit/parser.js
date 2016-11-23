@@ -94,6 +94,12 @@ describe('Parser', () => {
   })
 
   describe('#envReplacementParser', () => {
+    it('should return the ENV even if it doesnt have `=`', () => {
+      const env = ['EMPIRE_DATABASE_URL']
+      const result = Parser.envReplacementParser({ env, hostnames: [], links: [] })
+      expect(result[0]).to.equal(`EMPIRE_DATABASE_URL`)
+    })
+
     it('should replace the host if directly passed', () => {
       const env = ['EMPIRE_DATABASE_URL=postgres']
       const newHost = 'compose-test-repo-3-2-db-staging-runnabletest.runnable.ninja'
