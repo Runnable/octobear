@@ -50,6 +50,13 @@ The response correspond to the following schema:
 
 ## Tests
 
+In order to run tests locally you also need to pull submodules. The easiest way to do that is cloning repo with
+` --recursive` flag:
+
+```
+  git clone --recursive git@github.com:Runnable/octobear.git
+```
+
 There are three types of tests:
 
 1. Unit: Used to test individual functions
