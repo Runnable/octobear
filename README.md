@@ -57,6 +57,8 @@ In order to run tests locally you also need to pull submodules. The easiest way 
   git clone --recursive git@github.com:Runnable/octobear.git
 ```
 
+Also, in order to run tests locally you need to have `configs/.env.test` file.
+
 There are three types of tests:
 
 1. Unit: Used to test individual functions
