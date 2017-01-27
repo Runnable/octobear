@@ -157,20 +157,30 @@ describe('2. Instance with Image', () => {
     })
 
     it('should have the right number of services', () => {
-      expect(services).to.have.lengthOf(1)
+      expect(services).to.have.lengthOf(2)
     })
 
-    it('should not return a `dockerBuildPath`', () => {
+    it('should not return a `dockerBuildPath` on either', () => {
       expect(services).to.have.deep.property('[0].contextVersion')
       expect(services[0].contextVersion).to.not.have.property('buildDockerfilePath')
+      expect(services).to.have.deep.property('[1].contextVersion')
+      expect(services[1].contextVersion).to.not.have.property('buildDockerfilePath')
     })
 
-    it('should return a `files` object', () => {
+    it('should return a `files` object for the normal entry', () => {
       expect(services).to.have.deep.property('[0].files')
       const files = services[0].files
       expect(files).to.have.property('/Dockerfile')
       expect(files['/Dockerfile'].body).to.match(/FROM/)
       expect(files['/Dockerfile'].body).to.match(/dtestops\/mysql:5.7/)
+    })
+
+    it('should return a `files` object from the default main we had to create', () => {
+      expect(services).to.have.deep.property('[1].files')
+      const files = services[1].files
+      expect(files).to.have.property('/Dockerfile')
+      expect(files['/Dockerfile'].body).to.match(/FROM/)
+      expect(files['/Dockerfile'].body).to.match(/busybox/)
     })
 
     it('should the environment variables', () => {
