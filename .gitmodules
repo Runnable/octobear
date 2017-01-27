@@ -32,3 +32,9 @@
 [submodule "compose-test-repo-3.3"]
 	path = test/repos/compose-test-repo-3.3
 	url = git@github.com:RunnableTest/compose-test-repo-3.3.git
+[submodule "compose-test-repo-4.1"]
+	path = test/compose-test-repo-4.1
+	url = git@github.com:RunnableTest/compose-test-repo-4.1.git
+[submodule "test/compose-test-repo-4.1"]
+	path = test/compose-test-repo-4.1
+	url = git@github.com:RunnableTest/compose-test-repo-4.1.git
