@@ -4,7 +4,11 @@ const path = require('path')
 module.exports.sanitizeName = x => x.replace(/[^a-zA-Z0-9-]/g, '-')
 
 module.exports.getDockerFile = (repo) => {
-  const dockerComposeFilePath = path.join(__dirname, `repos/${repo}/docker-compose.yml`)
+  const dockerComposeFilePath = module.exports.getDockerComposePath(repo)
   const dockerComposeFileString = fs.readFileSync(dockerComposeFilePath).toString()
   return { dockerComposeFilePath, dockerComposeFileString }
+}
+
+module.exports.getDockerComposePath = (repo) => {
+  return path.join(__dirname, `repos/${repo}/docker-compose.yml`)
 }
