@@ -2,7 +2,7 @@
 
 const DockerComposeParser = require('index')
 
-describe('index', () => {
+describe('Index', () => {
   describe('#_parseDockerComposeFile', () => {
     let yml
 
@@ -32,7 +32,7 @@ services:
         .asCallback(done)
     })
 
-    it('should fail with version 3', (done) => {
+    it('should pass with version 3', (done) => {
       yml = `
 version: '3.0'
 services:
@@ -42,10 +42,7 @@ services:
       - "7890:7890"
 `
       DockerComposeParser._parseDockerComposeFile(yml)
-        .then(() => {
-          done(new Error('Should have failed'))
-        })
-        .catch(() => done())
+        .asCallback(done)
     })
     it('should fail with version 2.a', (done) => {
       yml = `
