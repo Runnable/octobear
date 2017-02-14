@@ -79,12 +79,14 @@ services:
     })
 
     it('should ignore a file if the file was not passed', () => {
-      services = DockerComposeParser.populateENVsFromFiles(services, envFilesMap)
-      expect(services).to.have.deep.property('[0].instance.env')
-      expect(services[0].instance.env).to.deep.equal([
-        'WOW=GREAT',
-        'HELLO=WOW'
-      ])
+      return DockerComposeParser.populateENVsFromFiles(services, envFilesMap)
+        .then(services => {
+          expect(services).to.have.deep.property('[0].instance.env')
+          expect(services[0].instance.env).to.deep.equal([
+            'WOW=GREAT',
+            'HELLO=WOW'
+          ])
+        })
     })
   })
 })

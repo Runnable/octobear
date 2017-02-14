@@ -6,7 +6,9 @@ _Docker Compose File parser for Runnable API Client_
 
 ## Usage
 
-This module provides only one function: `parse`
+This module provides two functions:
+
+#### `parse`
 
 ```
 const octobear = require('@runnable/octobear')
@@ -45,7 +47,21 @@ The response correspond to the following schema:
 			env: Array<String> // Array of strings for env variables. Includes hostname substitution
 		}
 	}]
+  envFiles: [String] // Array of all ENV files that should be loaded
 }
+```
+
+#### `populateENVsFromFiles`
+
+```
+const octobear = require('@runnable/octobear')
+
+octobear.parse({ ...  })
+.then(({ results: services, envFiles }) =>  {
+  const envFiles = getAllTheseFilesAsHashTable(res.envFiles) // An object with filesnames as keys and strings as values
+  return populateENVsFromFiles(services, envFiles)
+})
+.then(services => { ... })
 ```
 
 ## Tests

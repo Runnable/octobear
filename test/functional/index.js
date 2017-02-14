@@ -357,12 +357,14 @@ describe('4. Use of env_file', () => {
         const envFiles = getAllENVFiles(services[0].metadata.envFiles, repositoryName)
         const hostname1 = `${sanitizeName(repositoryName)}-db1-staging-${ownerUsername.toLowerCase()}.${userContentDomain}`
         const hostname2 = `${sanitizeName(repositoryName)}-db-staging-${ownerUsername.toLowerCase()}.${userContentDomain}`
-        services = populateENVsFromFiles(services, envFiles)
-        expect(services).to.have.deep.property('[0].instance.env')
-        expect(services[0].instance.env).to.deep.equal([
-          `RETHINKDB=${hostname1}`,
-          `DB_PORT=tcp://${hostname2}:5432`
-        ])
+        return populateENVsFromFiles(services, envFiles)
+          .then(services => {
+            expect(services).to.have.deep.property('[0].instance.env')
+            expect(services[0].instance.env).to.deep.equal([
+              `RETHINKDB=${hostname1}`,
+              `DB_PORT=tcp://${hostname2}:5432`
+            ])
+          })
       })
     })
   })
@@ -376,7 +378,6 @@ describe('4. Use of env_file', () => {
       return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername })
       .then(({ results: servicesResults, envFiles }) => {
         services = servicesResults
-        console.log('envFiles', envFiles)
       })
     })
 
@@ -412,7 +413,10 @@ describe('4. Use of env_file', () => {
     describe('After Parsing ENVs', () => {
       before(() => {
         const envFiles = getAllENVFiles(services[0].metadata.envFiles, repositoryName)
-        services = populateENVsFromFiles(services, envFiles)
+        return populateENVsFromFiles(services, envFiles)
+          .then(res => {
+            services = res
+          })
       })
 
       it('should correctly apply those ENV mappings when provided the files', () => {
