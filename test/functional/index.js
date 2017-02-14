@@ -330,3 +330,106 @@ describe('3. Multiple Instances with linking', () => {
     })
   })
 })
+
+describe('4. Use of env_file', () => {
+  describe('4.1: Hello Node `depends_on`', () => {
+    const repositoryName = 'compose-test-repo-4.1'
+    const dockerComposeFilePath = path.join(__dirname, `../repos/${repositoryName}/docker-compose.yml`)
+    const dockerComposeFileString = fs.readFileSync(dockerComposeFilePath).toString()
+    let services
+
+    before(() => {
+      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername })
+      .then(({ results: servicesResults }) => {
+        services = servicesResults
+      })
+    })
+
+    it('should have 2 services', () => {
+      expect(services).to.have.lengthOf(2)
+    })
+
+    describe('Main Instance', () => {
+      it('should return the correct initial ENVs', () => {
+        expect(services).to.have.deep.property('[0].instance.env')
+        expect(services[0].instance.env).to.deep.equal([])
+      })
+
+      it('should have the correct metadata for the env files and ENV mappings', () => {
+        // TODO: Check metadata for ENV files
+        // TODO: Check metadata for ENV search/replace
+      })
+
+      it('should correctly apply those ENV mappings when provided the files', () => {
+        // TODO: Add parsing
+        expect(services).to.have.deep.property('[0].instance.env')
+        expect(services[0].instance.env).to.deep.equal([])
+      })
+    })
+  })
+
+  describe('4.2 mutliple files in diff directories', () => {
+    const repositoryName = 'compose-test-repo-4.2'
+    const dockerComposeFilePath = path.join(__dirname, `../repos/${repositoryName}/docker-compose.yml`)
+    const dockerComposeFileString = fs.readFileSync(dockerComposeFilePath).toString()
+    let services
+
+    before(() => {
+      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername })
+      .then(({ results: servicesResults }) => {
+        services = servicesResults
+      })
+    })
+
+    it('should have 3 services', () => {
+      expect(services).to.have.lengthOf(3)
+    })
+
+    describe('Main Instance', () => {
+      it('should return the correct ENVs', () => {
+        const hostname = `${sanitizeName(repositoryName)}-db-staging-${ownerUsername.toLowerCase()}.${userContentDomain}`
+        expect(services).to.have.deep.property('[0].instance.env')
+        expect(services[0].instance.env).to.deep.equal([
+          `RETHINKDB=${hostname}`
+        ])
+      })
+
+      it('should have the correct metadata for the env files and ENV mappings', () => {
+        // TODO: Check metadata for ENV files
+        // TODO: Check metadata for ENV search/replace
+      })
+
+      it('should correctly apply those ENV mappings when provided the files', () => {
+        // TODO: Add parsing
+        const hostname = `${sanitizeName(repositoryName)}-rethinkdb-staging-${ownerUsername.toLowerCase()}.${userContentDomain}`
+        expect(services).to.have.deep.property('[0].instance.env')
+        expect(services[0].instance.env).to.deep.equal([
+          `RETHINKDB=${hostname}`,
+          `REDIS=redis`
+        ])
+      })
+    })
+
+    describe('Secondary Instance', () => {
+      it('should return the correct ENVs', () => {
+        expect(services).to.have.deep.property('[0].instance.env')
+        expect(services[1].instance.env).to.deep.equal([])
+      })
+
+      it('should have the correct metadata for the env files and ENV mappings', () => {
+        // TODO: Check metadata for ENV files
+        // TODO: Check metadata for ENV search/replace
+      })
+
+      it('should correctly apply those ENV mappings when provided the files', () => {
+        // TODO: Add parsing
+        const hostname = `${sanitizeName(repositoryName)}-redis-staging-${ownerUsername.toLowerCase()}.${userContentDomain}`
+        expect(services).to.have.deep.property('[0].instance.env')
+        expect(services[1].instance.env).to.deep.equal([
+          `RETHINKDB=rethinkdb`,
+          `REDIS=${hostname}`
+        ])
+      })
+    })
+  })
+})

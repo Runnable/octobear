@@ -1,0 +1,21 @@
+version: '2'
+services:
+  web:
+    build: .
+    ports:
+      - "80"
+      - "3000"
+    links:
+      - 'rethinkdb'
+    env_file:
+      - env/some-environment-name/.env
+      - env/some-environment-name/another-env-file.txt
+  rethinkdb:
+    image: 'rethinkdb'
+    links:
+      - 'redis'
+    env_file:
+      - env/some-environment-name/.env
+      - env/some-environment-name/another-env-file.txt
+  redis:
+    image: 'redis'
