@@ -1,6 +1,6 @@
 'use strict'
 require('loadenv')()
-const { parse } = require('index')
+const { parse, populateENVsFromFiles } = require('index')
 const { expect } = require('chai')
 const fs = require('fs')
 const path = require('path')
@@ -353,10 +353,16 @@ describe('4. Use of env_file', () => {
         expect(services[0].metadata.links).to.deep.equal([ 'db', 'db1' ])
       })
 
-      xit('should correctly apply those ENV mappings when provided the files', () => {
-        const envFiles = getAllENVFiles(services[0].metadata.envFiles)
+      it('should correctly apply those ENV mappings when provided the files', () => {
+        const envFiles = getAllENVFiles(services[0].metadata.envFiles, repositoryName)
+        const hostname1 = `${sanitizeName(repositoryName)}-db1-staging-${ownerUsername.toLowerCase()}.${userContentDomain}`
+        const hostname2 = `${sanitizeName(repositoryName)}-db-staging-${ownerUsername.toLowerCase()}.${userContentDomain}`
+        services = populateENVsFromFiles(services, envFiles)
         expect(services).to.have.deep.property('[0].instance.env')
-        expect(services[0].instance.env).to.deep.equal([])
+        expect(services[0].instance.env).to.deep.equal([
+          `RETHINKDB=${hostname1}`,
+          `DB_PORT=tcp://${hostname2}:5432`
+        ])
       })
     })
   })
@@ -368,8 +374,9 @@ describe('4. Use of env_file', () => {
 
     before(() => {
       return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername })
-      .then(({ results: servicesResults }) => {
+      .then(({ results: servicesResults, envFiles }) => {
         services = servicesResults
+        console.log('envFiles', envFiles)
       })
     })
 
@@ -379,22 +386,15 @@ describe('4. Use of env_file', () => {
 
     describe('Main Instance', () => {
       it('should return the correct ENVs', () => {
-        expect(services).to.not.have.deep.property('[0].instance.env')
+        expect(services).to.have.deep.property('[0].instance.env')
+        expect(services[0].instance.env).to.deep.equal([
+          `ENVIRONMENT=staging`
+        ])
       })
 
       it('should have the correct metadata for the env files and ENV mappings', () => {
         expect(services[0].metadata.envFiles).to.deep.equal([ 'env/some-environment-name/.env', 'env/some-environment-name/another-env-file.txt' ])
         expect(services[0].metadata.links).to.deep.equal([ 'rethinkdb' ])
-      })
-
-      xit('should correctly apply those ENV mappings when provided the files', () => {
-        // TODO: Add parsing
-        const hostname = `${sanitizeName(repositoryName)}-rethinkdb-staging-${ownerUsername.toLowerCase()}.${userContentDomain}`
-        expect(services).to.have.deep.property('[0].instance.env')
-        expect(services[0].instance.env).to.deep.equal([
-          `RETHINKDB=${hostname}`,
-          `REDIS=redis`
-        ])
       })
     })
 
@@ -407,9 +407,25 @@ describe('4. Use of env_file', () => {
         expect(services[1].metadata.envFiles).to.deep.equal([ 'env/some-environment-name/.env', 'env/some-environment-name/another-env-file.txt' ])
         expect(services[1].metadata.links).to.deep.equal([ 'redis' ])
       })
+    })
 
-      xit('should correctly apply those ENV mappings when provided the files', () => {
-        // TODO: Add parsing
+    describe('After Parsing ENVs', () => {
+      before(() => {
+        const envFiles = getAllENVFiles(services[0].metadata.envFiles, repositoryName)
+        services = populateENVsFromFiles(services, envFiles)
+      })
+
+      it('should correctly apply those ENV mappings when provided the files', () => {
+        const hostname = `${sanitizeName(repositoryName)}-rethinkdb-staging-${ownerUsername.toLowerCase()}.${userContentDomain}`
+        expect(services).to.have.deep.property('[0].instance.env')
+        expect(services[0].instance.env).to.deep.equal([
+          `ENVIRONMENT=staging`,
+          `RETHINKDB=${hostname}`,
+          `REDIS=redis`
+        ])
+      })
+
+      it('should correctly apply those ENV mappings when provided the files', () => {
         const hostname = `${sanitizeName(repositoryName)}-redis-staging-${ownerUsername.toLowerCase()}.${userContentDomain}`
         expect(services).to.have.deep.property('[0].instance.env')
         expect(services[1].instance.env).to.deep.equal([

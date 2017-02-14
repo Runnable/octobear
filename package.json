@@ -44,6 +44,7 @@
   "dependencies": {
     "@runnable/hostname": "^3.0.0",
     "bluebird": "^3.4.6",
+    "dotenv": "^4.0.0",
     "joi": "^9.2.0",
     "js-yaml": "^3.7.0"
   }

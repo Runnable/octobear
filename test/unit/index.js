@@ -1,5 +1,6 @@
 'use strict'
 
+const { expect } = require('chai')
 const DockerComposeParser = require('index')
 
 describe('Index', () => {
@@ -56,6 +57,34 @@ services:
       DockerComposeParser._parseDockerComposeFile(yml)
         .then(() => { done(new Error('Should have failed')) })
         .catch(() => done())
+    })
+  })
+
+  describe('#populateENVsFromFiles', () => {
+    let services
+    let envFilesMap
+    beforeEach(() => {
+      services = [{
+        metadata: {
+          envFiles: ['./file-that-exists', './file-that-doesnt-exist'],
+          links: []
+        },
+        instance: {
+          env: ['WOW=GREAT']
+        }
+      }]
+      envFilesMap = {
+        './file-that-exists': 'HELLO=WOW'
+      }
+    })
+
+    it('should ignore a file if the file was not passed', () => {
+      services = DockerComposeParser.populateENVsFromFiles(services, envFilesMap)
+      expect(services).to.have.deep.property('[0].instance.env')
+      expect(services[0].instance.env).to.deep.equal([
+        'WOW=GREAT',
+        'HELLO=WOW'
+      ])
     })
   })
 })

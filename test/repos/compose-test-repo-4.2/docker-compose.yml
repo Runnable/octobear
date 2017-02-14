@@ -7,8 +7,10 @@ services:
       - "3000"
     links:
       - 'rethinkdb'
+    environment:
+      - 'ENVIRONMENT=staging'
     env_file:
-      - env/some-environment-name/.env
+      - ./env/some-environment-name/.env
       - env/some-environment-name/another-env-file.txt
   rethinkdb:
     image: 'rethinkdb'
@@ -16,6 +18,6 @@ services:
       - 'redis'
     env_file:
       - env/some-environment-name/.env
-      - env/some-environment-name/another-env-file.txt
+      - ./env/some-environment-name/another-env-file.txt
   redis:
     image: 'redis'

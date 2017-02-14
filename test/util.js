@@ -12,3 +12,11 @@ module.exports.getDockerFile = (repo) => {
 module.exports.getDockerComposePath = (repo) => {
   return path.join(__dirname, `repos/${repo}/docker-compose.yml`)
 }
+
+module.exports.getAllENVFiles = (filePaths, repo) => {
+  return filePaths.reduce((obj, partialFilePath) => {
+    let filePath = path.join(__dirname, `repos/${repo}/${partialFilePath}`)
+    obj[partialFilePath] = fs.readFileSync(filePath).toString()
+    return obj
+  }, {})
+}
