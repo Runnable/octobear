@@ -1,8 +1,9 @@
 'use strict'
 
+const { expect } = require('chai')
 const DockerComposeParser = require('index')
 
-describe('index', () => {
+describe('Index', () => {
   describe('#_parseDockerComposeFile', () => {
     let yml
 
@@ -32,7 +33,7 @@ services:
         .asCallback(done)
     })
 
-    it('should fail with version 3', (done) => {
+    it('should pass with version 3', (done) => {
       yml = `
 version: '3.0'
 services:
@@ -42,10 +43,7 @@ services:
       - "7890:7890"
 `
       DockerComposeParser._parseDockerComposeFile(yml)
-        .then(() => {
-          done(new Error('Should have failed'))
-        })
-        .catch(() => done())
+        .asCallback(done)
     })
     it('should fail with version 2.a', (done) => {
       yml = `
@@ -59,6 +57,36 @@ services:
       DockerComposeParser._parseDockerComposeFile(yml)
         .then(() => { done(new Error('Should have failed')) })
         .catch(() => done())
+    })
+  })
+
+  describe('#populateENVsFromFiles', () => {
+    let services
+    let envFilesMap
+    beforeEach(() => {
+      services = [{
+        metadata: {
+          envFiles: ['./file-that-exists', './file-that-doesnt-exist'],
+          links: []
+        },
+        instance: {
+          env: ['WOW=GREAT']
+        }
+      }]
+      envFilesMap = {
+        './file-that-exists': 'HELLO=WOW'
+      }
+    })
+
+    it('should ignore a file if the file was not passed', () => {
+      return DockerComposeParser.populateENVsFromFiles(services, envFilesMap)
+        .then(services => {
+          expect(services).to.have.deep.property('[0].instance.env')
+          expect(services[0].instance.env).to.deep.equal([
+            'WOW=GREAT',
+            'HELLO=WOW'
+          ])
+        })
     })
   })
 })
