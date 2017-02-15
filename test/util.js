@@ -13,9 +13,15 @@ module.exports.getDockerComposePath = (repo) => {
   return path.join(__dirname, `repos/${repo}/docker-compose.yml`)
 }
 
-module.exports.getAllENVFiles = (filePaths, repo) => {
+module.exports.getAllENVFiles = (filePaths, repo, overwritePath) => {
   return filePaths.reduce((obj, partialFilePath) => {
-    let filePath = path.join(__dirname, `repos/${repo}/${partialFilePath}`)
+    let filePath
+    if (overwritePath) {
+      filePath = path.join(__dirname, `${overwritePath}/${partialFilePath}`)
+    } else {
+      filePath = path.join(__dirname, `repos/${repo}/${partialFilePath}`)
+    }
+
     obj[partialFilePath] = fs.readFileSync(filePath).toString()
     return obj
   }, {})

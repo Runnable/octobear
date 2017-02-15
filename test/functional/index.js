@@ -439,4 +439,46 @@ describe('4. Use of env_file', () => {
       })
     })
   })
+
+  describe('4.3: Relative Paths', () => {
+    const repositoryName = 'compose-test-repo-4.3'
+    const dockerComposeFilePath = 'docker/compose.yml'
+    const absoluteDockerComposeFilePath = path.join(__dirname, `../repos/${repositoryName}/${dockerComposeFilePath}`)
+    const dockerComposeFileString = fs.readFileSync(absoluteDockerComposeFilePath).toString()
+    let services
+
+    before(() => {
+      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername, dockerComposeFilePath })
+      .then(({ results: servicesResults }) => {
+        services = servicesResults
+      })
+    })
+
+    it('should have a single service', () => {
+      expect(services).to.have.lengthOf(1)
+    })
+
+    describe('Main Instance', () => {
+      it('should return the correct initial ENVs', () => {
+        expect(services).to.not.have.deep.property('[0].instance.env')
+      })
+
+      it('should have the correct metadata for the env files and ENV mappings', () => {
+        expect(services[0].metadata.envFiles.slice().sort()).to.deep.equal([ '.env', 'docker/.env', 'src/.env' ].sort())
+      })
+
+      it('should correctly apply those ENV mappings when provided the files', () => {
+        const envFiles = getAllENVFiles(services[0].metadata.envFiles, null, `repos/${repositoryName}/`)
+        return populateENVsFromFiles(services, envFiles)
+          .then(services => {
+            expect(services).to.have.deep.property('[0].instance.env')
+            expect(services[0].instance.env).to.deep.equal([
+              `ENV1=true`, // ENV in docker/.env
+              `ENV2=true`, // ENV in .env
+              `ENV3=true`  // ENV in src/.env
+            ])
+          })
+      })
+    })
+  })
 })
