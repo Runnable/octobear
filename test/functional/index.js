@@ -528,12 +528,13 @@ describe('5. Links and aliases', () => {
         })
       })
 
-      it('should have the ENVs when specifying an alias', () => {
+      it('should not replace aliases with hostnames', () => {
         const hostname = `${sanitizeName(repositoryName)}-rethinkdb3-staging-${ownerUsername.toLowerCase()}.${userContentDomain}`
         expect(services).to.have.deep.property('[0].instance.env')
-        expect(services[1].instance.env).to.deep.equal([
+        expect(services[0].instance.env).to.deep.equal([
           `PORT=3000`,
-          `RETHINKDB_3=r${hostname}`
+          `RETHINKDB_3_1=${hostname}`,
+          `RETHINKDB_3_2=another1.super_weird.00host`
         ])
       })
     })
@@ -547,14 +548,16 @@ describe('5. Links and aliases', () => {
           })
       })
 
-      it('should correctly apply ENV mappings for aliases when provided the files', () => {
+      it('should not replace aliases with hostnames', () => {
         const hostname1 = `${sanitizeName(repositoryName)}-rethinkdb3-staging-${ownerUsername.toLowerCase()}.${userContentDomain}`
         const hostname2 = `${sanitizeName(repositoryName)}-rethinkdb4-staging-${ownerUsername.toLowerCase()}.${userContentDomain}`
         expect(services).to.have.deep.property('[0].instance.env')
-        expect(services[1].instance.env).to.deep.equal([
+        expect(services[0].instance.env).to.deep.equal([
           `PORT=3000`,
-          `RETHINKDB_3=r${hostname1}`,
-          `RETHINKDB_4=r${hostname2}`
+          `RETHINKDB_3_1=${hostname1}`,
+          `RETHINKDB_3_2=another1.super_weird.00host`,
+          `RETHINKDB_4_1=${hostname2}`,
+          `RETHINKDB_4_2=omg.not.another.one`
         ])
       })
     })
