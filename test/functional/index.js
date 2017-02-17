@@ -482,3 +482,84 @@ describe('4. Use of env_file', () => {
     })
   })
 })
+
+describe('5. Links and aliases', () => {
+  describe('5.1', () => {
+    const repositoryName = 'compose-test-repo-5.1'
+    const { dockerComposeFileString } = getDockerFile(repositoryName)
+    let services
+
+    before(() => {
+      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername })
+      .then(({ results: servicesResults, envFiles }) => {
+        services = servicesResults
+      })
+    })
+
+    it('should have 5 services', () => {
+      expect(services).to.have.lengthOf(5)
+    })
+
+    describe('Main Instance', () => {
+      it('should have the correct aliases in the instances property', () => {
+        expect(services).to.have.deep.property('[0].instance.aliases')
+        expect(services[0].instance.aliases).to.be.an.object
+      })
+
+      it('should have the correct links', () => {
+        expect(services).to.have.deep.property('[0].metadata.links')
+        expect(services[0].metadata.links).to.deep.equal([
+          'rethinkdb1',
+          'rethinkdb2',
+          'rethinkdb3',
+          'rethinkdb4'
+        ])
+      })
+
+      it('should have the correct aliases in the instances property', () => {
+        expect(services[0].instance.aliases).to.deep.equal({
+          'rethinkdb1': 'compose-test-repo-5-1-rethinkdb1',
+          'rethinkdb2': 'compose-test-repo-5-1-rethinkdb2',
+          'some-weird-host': 'compose-test-repo-5-1-rethinkdb2',
+          'rethinkdb3': 'compose-test-repo-5-1-rethinkdb3',
+          'another1.super_weird.00host': 'compose-test-repo-5-1-rethinkdb3',
+          'rethinkdb4': 'compose-test-repo-5-1-rethinkdb4',
+          'omg.not.another.one': 'compose-test-repo-5-1-rethinkdb4'
+        })
+      })
+
+      it('should not replace aliases with hostnames', () => {
+        const hostname = `${sanitizeName(repositoryName)}-rethinkdb3-staging-${ownerUsername.toLowerCase()}.${userContentDomain}`
+        expect(services).to.have.deep.property('[0].instance.env')
+        expect(services[0].instance.env).to.deep.equal([
+          `PORT=3000`,
+          `RETHINKDB_3_1=${hostname}`,
+          `RETHINKDB_3_2=another1.super_weird.00host`
+        ])
+      })
+    })
+
+    describe('After Parsing ENVs', () => {
+      before(() => {
+        const envFiles = getAllENVFiles(services[0].metadata.envFiles, repositoryName)
+        return populateENVsFromFiles(services, envFiles)
+          .then(res => {
+            services = res
+          })
+      })
+
+      it('should not replace aliases with hostnames', () => {
+        const hostname1 = `${sanitizeName(repositoryName)}-rethinkdb3-staging-${ownerUsername.toLowerCase()}.${userContentDomain}`
+        const hostname2 = `${sanitizeName(repositoryName)}-rethinkdb4-staging-${ownerUsername.toLowerCase()}.${userContentDomain}`
+        expect(services).to.have.deep.property('[0].instance.env')
+        expect(services[0].instance.env).to.deep.equal([
+          `PORT=3000`,
+          `RETHINKDB_3_1=${hostname1}`,
+          `RETHINKDB_3_2=another1.super_weird.00host`,
+          `RETHINKDB_4_1=${hostname2}`,
+          `RETHINKDB_4_2=omg.not.another.one`
+        ])
+      })
+    })
+  })
+})
