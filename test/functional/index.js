@@ -518,13 +518,34 @@ describe('5. Links and aliases', () => {
 
       it('should have the correct aliases in the instances property', () => {
         expect(services[0].instance.aliases).to.deep.equal({
-          'rethinkdb1': 'compose-test-repo-5-1-rethinkdb1',
-          'rethinkdb2': 'compose-test-repo-5-1-rethinkdb2',
-          'some-weird-host': 'compose-test-repo-5-1-rethinkdb2',
-          'rethinkdb3': 'compose-test-repo-5-1-rethinkdb3',
-          'another1.super_weird.00host': 'compose-test-repo-5-1-rethinkdb3',
-          'rethinkdb4': 'compose-test-repo-5-1-rethinkdb4',
-          'omg.not.another.one': 'compose-test-repo-5-1-rethinkdb4'
+          'cmV0aGlua2RiMQ==': {
+            'alias': 'rethinkdb1',
+            'instanceName': 'compose-test-repo-5-1-rethinkdb1'
+          },
+          'cmV0aGlua2RiMg==': {
+            'alias': 'rethinkdb2',
+            'instanceName': 'compose-test-repo-5-1-rethinkdb2'
+          },
+          'c29tZS13ZWlyZC1ob3N0': {
+            'alias': 'some-weird-host',
+            'instanceName': 'compose-test-repo-5-1-rethinkdb2'
+          },
+          'cmV0aGlua2RiMw==': {
+            'alias': 'rethinkdb3',
+            'instanceName': 'compose-test-repo-5-1-rethinkdb3'
+          },
+          'YW5vdGhlcjEuc3VwZXJfd2VpcmQuMDBob3N0': {
+            'alias': 'another1.super_weird.00host',
+            'instanceName': 'compose-test-repo-5-1-rethinkdb3'
+          },
+          'cmV0aGlua2RiNA==': {
+            'alias': 'rethinkdb4',
+            'instanceName': 'compose-test-repo-5-1-rethinkdb4'
+          },
+          'b21nLm5vdC5hbm90aGVyLm9uZQ==': {
+            'alias': 'omg.not.another.one',
+            'instanceName': 'compose-test-repo-5-1-rethinkdb4'
+          }
         })
       })
 
