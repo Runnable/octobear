@@ -83,7 +83,7 @@ There are three types of tests:
 
 ### Adding Submmodules
 
-1. Go into `test/resps/${NAME}`
+1. Go into `test/repos/${NAME}`
 2. Run `git init`
 3. Run `git add -A`
 4. Run `git commit -m ""`
