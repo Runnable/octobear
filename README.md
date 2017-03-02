@@ -31,13 +31,15 @@ The response correspond to the following schema:
 			name: String, // Name specified for service in `docker-compose.yml`
 			isMain: Boolean, // Wether this should be the instance for which a repo instance should be created
 		},
-		contextVersion: {
-			advanced: Boolean, // Always `true`. All instances created will be advanced instances
-			buildDockerfilePath: String // Optional. Path for Dockerfile used to build instance
+    // optional
+		code: {
+			repo: 'String', // repo full name
+      commitish: 'String' // Optional. Commit or branch
 		}),
+    buildDockerfilePath: String // Optional. Path for Dockerfile used to build instance
 		files: { // Optional
 		 '/Dockerfile': {
-				body: String // Body for Dockerfile to be used. Only specified if there is  no `contextVersion.buildDockerfilePath`
+				body: String // Body for Dockerfile to be used. Only specified if there is  no `buildDockerfilePath`
 			}
 		},
 		instance: {

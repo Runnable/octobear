@@ -30,8 +30,8 @@ describe('1. Instance with Dockerfile', () => {
     })
 
     it('should return the correct `buildDockerfilePath`', () => {
-      expect(services).to.have.deep.property('[0].contextVersion.buildDockerfilePath')
-      expect(services[0].contextVersion.buildDockerfilePath).to.equal('/Dockerfile')
+      expect(services).to.have.deep.property('[0].buildDockerfilePath')
+      expect(services[0].buildDockerfilePath).to.equal('/Dockerfile')
     })
 
     it('should return the correct ports', () => {
@@ -61,7 +61,7 @@ describe('1. Instance with Dockerfile', () => {
     it('should return the correct `buildDockerfilePath`', () => {
       expect(services).to.have.deep.property('[0].instance.containerStartCommand')
       expect(services).to.be.an.object
-      expect(services[0].contextVersion.buildDockerfilePath).to.equal('/src/Dockerfile')
+      expect(services[0].buildDockerfilePath).to.equal('/src/Dockerfile')
     })
 
     it('should return the correct `containerStartCommand`', () => {
@@ -103,8 +103,8 @@ describe('1. Instance with Dockerfile', () => {
     })
 
     it('should return the correct `buildDockerfilePath`', () => {
-      expect(services).to.have.deep.property('[0].contextVersion.buildDockerfilePath')
-      expect(services[0].contextVersion.buildDockerfilePath).to.equal('/src/not-so-dockerfile.Dockerfile')
+      expect(services).to.have.deep.property('[0].buildDockerfilePath')
+      expect(services[0].buildDockerfilePath).to.equal('/src/not-so-dockerfile.Dockerfile')
     })
 
     it('should return the correct `containerStartCommand`', () => {
@@ -136,8 +136,8 @@ describe('1. Instance with Dockerfile', () => {
     })
 
     it('should return the correct `buildDockerfilePath`', () => {
-      expect(services).to.have.deep.property('[0].contextVersion.buildDockerfilePath')
-      expect(services[0].contextVersion.buildDockerfilePath).to.equal('/src/not-so-dockerfile.Dockerfile')
+      expect(services).to.have.deep.property('[0].buildDockerfilePath')
+      expect(services[0].buildDockerfilePath).to.equal('/src/not-so-dockerfile.Dockerfile')
     })
   })
 })
@@ -160,10 +160,8 @@ describe('2. Instance with Image', () => {
     })
 
     it('should not return a `dockerBuildPath` on either', () => {
-      expect(services).to.have.deep.property('[0].contextVersion')
-      expect(services[0].contextVersion).to.not.have.property('buildDockerfilePath')
-      expect(services).to.have.deep.property('[1].contextVersion')
-      expect(services[1].contextVersion).to.not.have.property('buildDockerfilePath')
+      expect(services[0]).to.not.have.property('buildDockerfilePath')
+      expect(services[1]).to.not.have.property('buildDockerfilePath')
     })
 
     it('should return a `files` object for the normal entry', () => {
@@ -222,8 +220,8 @@ describe('3. Multiple Instances with linking', () => {
       })
 
       it('should return a `dockerBuildPath`', () => {
-        expect(services).to.have.deep.property('[0].contextVersion.buildDockerfilePath')
-        expect(services[0].contextVersion.buildDockerfilePath).to.equal('/Dockerfile')
+        expect(services).to.have.deep.property('[0].buildDockerfilePath')
+        expect(services[0].buildDockerfilePath).to.equal('/Dockerfile')
       })
 
       it('should return the right ports', () => {
@@ -251,11 +249,6 @@ describe('3. Multiple Instances with linking', () => {
         expect(files).to.have.property('/Dockerfile')
         expect(files['/Dockerfile'].body).to.match(/FROM/)
         expect(files['/Dockerfile'].body).to.match(/postgres/)
-      })
-
-      it('should return the right context version properties', () => {
-        expect(services).to.have.deep.property('[1].contextVersion.advanced')
-        expect(services[1].contextVersion.advanced).to.equal(true)
       })
     })
   })
@@ -607,14 +600,14 @@ describe('6. Build GitHub repos', () => {
     })
 
     it('should return the correct `buildDockerfilePath`', () => {
-      expect(services).to.have.deep.property('[0].contextVersion.buildDockerfilePath')
-      expect(services[0].contextVersion.buildDockerfilePath).to.equal('/Dockerfile')
+      expect(services).to.have.deep.property('[0].buildDockerfilePath')
+      expect(services[0].buildDockerfilePath).to.equal('/Dockerfile')
     })
 
     it('should return the correct `code`', () => {
       expect(services).to.have.deep.property('[0].code')
       expect(services[0].code.repo).to.equal('RunnableTest/node-starter')
-      expect(services[0].code.commitish).to.equal(null)
+      expect(services[0].code.commitish).to.equal(undefined)
     })
 
     it('should return the correct ports', () => {
@@ -641,8 +634,8 @@ describe('6. Build GitHub repos', () => {
     })
 
     it('should return the correct `buildDockerfilePath`', () => {
-      expect(services).to.have.deep.property('[0].contextVersion.buildDockerfilePath')
-      expect(services[0].contextVersion.buildDockerfilePath).to.equal('/Dockerfile')
+      expect(services).to.have.deep.property('[0].buildDockerfilePath')
+      expect(services[0].buildDockerfilePath).to.equal('/Dockerfile')
     })
 
     it('should return the correct `code`', () => {
