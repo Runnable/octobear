@@ -9,7 +9,7 @@
   "scripts": {
     "test": "npm run lint && npm run coverage",
     "coverage": "NODE_PATH=./lib NODE_ENV=test istanbul cover _mocha -- --recursive test/unit test/functional/ && npm run coverage-check",
-    "coverage-unit": "NODE_PATH=./lib NODE_ENV=test istanbul cover _mocha --dir coverage-unit -- --recursive test/unit",
+    "coverage-unit": " NODE_PATH=./lib NODE_ENV=test istanbul cover _mocha --dir coverage-unit -- --recursive test/unit",
     "coverage-functional": "NODE_PATH=./lib NODE_ENV=test istanbul cover _mocha --dir coverage-unit -- --recursive test/functional",
     "coverage-check": "istanbul check-coverage --statement 100 --functions 100 --branches 100 --lines 100 && echo 'Coverage check successful!'",
     "lint": "standard --verbose",

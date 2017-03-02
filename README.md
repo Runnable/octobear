@@ -31,13 +31,15 @@ The response correspond to the following schema:
 			name: String, // Name specified for service in `docker-compose.yml`
 			isMain: Boolean, // Wether this should be the instance for which a repo instance should be created
 		},
-		contextVersion: {
-			advanced: Boolean, // Always `true`. All instances created will be advanced instances
-			buildDockerfilePath: String // Optional. Path for Dockerfile used to build instance
+    // optional
+		code: {
+			repo: 'String', // repo full name
+      commitish: 'String' // Optional. Commit or branch
 		}),
+    buildDockerfilePath: String // Optional. Path for Dockerfile used to build instance
 		files: { // Optional
 		 '/Dockerfile': {
-				body: String // Body for Dockerfile to be used. Only specified if there is  no `contextVersion.buildDockerfilePath`
+				body: String // Body for Dockerfile to be used. Only specified if there is  no `buildDockerfilePath`
 			}
 		},
 		instance: {
@@ -80,3 +82,16 @@ There are three types of tests:
 1. Unit: Used to test individual functions
 2. Functional: Used to test the complete flow of a function. This should not use any external services.
 3. Integration: Used to test results of parsing against the Runnable API
+
+### Adding Submmodules
+
+1. Go into `test/repos/${NAME}`
+2. Run `git init`
+3. Run `git add -A`
+4. Run `git commit -m ""`
+5. Create repo in github
+6. Push changes to github
+7. `rm -rf test/repos/${NAME}` (It's in github, don't worry)
+8. git submodule add git@github.com:RunnableTest/${NAME}.git test/repos/${NAME}
+9. Run `git status` and make sure repo was added to `.gitmodules` and was added
+10. Add + Commit + Push octobear repo

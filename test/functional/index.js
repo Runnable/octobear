@@ -10,6 +10,7 @@ const getAllENVFiles = require('../util').getAllENVFiles
 
 const userContentDomain = 'runnable.ninja'
 const ownerUsername = process.env.GITHUB_USERNAME
+const scmDomain = 'github.com'
 
 describe('1. Instance with Dockerfile', () => {
   describe('1.1: Simple Docker Compose File', () => {
@@ -18,7 +19,7 @@ describe('1. Instance with Dockerfile', () => {
     let services
 
     before(() => {
-      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername })
+      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername, scmDomain })
       .then(({ results: servicesResults }) => {
         services = servicesResults
       })
@@ -29,8 +30,8 @@ describe('1. Instance with Dockerfile', () => {
     })
 
     it('should return the correct `buildDockerfilePath`', () => {
-      expect(services).to.have.deep.property('[0].contextVersion.buildDockerfilePath')
-      expect(services[0].contextVersion.buildDockerfilePath).to.equal('/Dockerfile')
+      expect(services).to.have.deep.property('[0].buildDockerfilePath')
+      expect(services[0].buildDockerfilePath).to.equal('/Dockerfile')
     })
 
     it('should return the correct ports', () => {
@@ -47,7 +48,7 @@ describe('1. Instance with Dockerfile', () => {
     let services
 
     before(() => {
-      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername })
+      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername, scmDomain })
       .then(({ results: servicesResults }) => {
         services = servicesResults
       })
@@ -60,7 +61,7 @@ describe('1. Instance with Dockerfile', () => {
     it('should return the correct `buildDockerfilePath`', () => {
       expect(services).to.have.deep.property('[0].instance.containerStartCommand')
       expect(services).to.be.an.object
-      expect(services[0].contextVersion.buildDockerfilePath).to.equal('/src/Dockerfile')
+      expect(services[0].buildDockerfilePath).to.equal('/src/Dockerfile')
     })
 
     it('should return the correct `containerStartCommand`', () => {
@@ -91,7 +92,7 @@ describe('1. Instance with Dockerfile', () => {
     let services
 
     before(() => {
-      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername })
+      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername, scmDomain })
       .then(({ results: servicesResults }) => {
         services = servicesResults
       })
@@ -102,8 +103,8 @@ describe('1. Instance with Dockerfile', () => {
     })
 
     it('should return the correct `buildDockerfilePath`', () => {
-      expect(services).to.have.deep.property('[0].contextVersion.buildDockerfilePath')
-      expect(services[0].contextVersion.buildDockerfilePath).to.equal('/src/not-so-dockerfile.Dockerfile')
+      expect(services).to.have.deep.property('[0].buildDockerfilePath')
+      expect(services[0].buildDockerfilePath).to.equal('/src/not-so-dockerfile.Dockerfile')
     })
 
     it('should return the correct `containerStartCommand`', () => {
@@ -124,7 +125,7 @@ describe('1. Instance with Dockerfile', () => {
     let services
 
     before(() => {
-      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername })
+      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername, scmDomain })
       .then(({ results: servicesResults }) => {
         services = servicesResults
       })
@@ -135,8 +136,8 @@ describe('1. Instance with Dockerfile', () => {
     })
 
     it('should return the correct `buildDockerfilePath`', () => {
-      expect(services).to.have.deep.property('[0].contextVersion.buildDockerfilePath')
-      expect(services[0].contextVersion.buildDockerfilePath).to.equal('/src/not-so-dockerfile.Dockerfile')
+      expect(services).to.have.deep.property('[0].buildDockerfilePath')
+      expect(services[0].buildDockerfilePath).to.equal('/src/not-so-dockerfile.Dockerfile')
     })
   })
 })
@@ -148,7 +149,7 @@ describe('2. Instance with Image', () => {
     let services
 
     before(() => {
-      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername })
+      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername, scmDomain })
       .then(({ results: servicesResults }) => {
         services = servicesResults
       })
@@ -159,10 +160,8 @@ describe('2. Instance with Image', () => {
     })
 
     it('should not return a `dockerBuildPath` on either', () => {
-      expect(services).to.have.deep.property('[0].contextVersion')
-      expect(services[0].contextVersion).to.not.have.property('buildDockerfilePath')
-      expect(services).to.have.deep.property('[1].contextVersion')
-      expect(services[1].contextVersion).to.not.have.property('buildDockerfilePath')
+      expect(services[0]).to.not.have.property('buildDockerfilePath')
+      expect(services[1]).to.not.have.property('buildDockerfilePath')
     })
 
     it('should return a `files` object for the normal entry', () => {
@@ -205,7 +204,7 @@ describe('3. Multiple Instances with linking', () => {
     let services
 
     before(() => {
-      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername })
+      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername, scmDomain })
       .then(({ results: servicesResults }) => {
         services = servicesResults
       })
@@ -221,8 +220,8 @@ describe('3. Multiple Instances with linking', () => {
       })
 
       it('should return a `dockerBuildPath`', () => {
-        expect(services).to.have.deep.property('[0].contextVersion.buildDockerfilePath')
-        expect(services[0].contextVersion.buildDockerfilePath).to.equal('/Dockerfile')
+        expect(services).to.have.deep.property('[0].buildDockerfilePath')
+        expect(services[0].buildDockerfilePath).to.equal('/Dockerfile')
       })
 
       it('should return the right ports', () => {
@@ -251,11 +250,6 @@ describe('3. Multiple Instances with linking', () => {
         expect(files['/Dockerfile'].body).to.match(/FROM/)
         expect(files['/Dockerfile'].body).to.match(/postgres/)
       })
-
-      it('should return the right context version properties', () => {
-        expect(services).to.have.deep.property('[1].contextVersion.advanced')
-        expect(services[1].contextVersion.advanced).to.equal(true)
-      })
     })
   })
 
@@ -265,7 +259,7 @@ describe('3. Multiple Instances with linking', () => {
     let services
 
     before(() => {
-      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername })
+      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername, scmDomain })
       .then(({ results: servicesResults }) => {
         services = servicesResults
       })
@@ -292,7 +286,7 @@ describe('3. Multiple Instances with linking', () => {
     let services
 
     before(() => {
-      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername })
+      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername, scmDomain })
       .then(({ results: servicesResults }) => {
         services = servicesResults
       })
@@ -333,7 +327,7 @@ describe('4. Use of env_file', () => {
     let services
 
     before(() => {
-      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername })
+      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername, scmDomain })
       .then(({ results: servicesResults }) => {
         services = servicesResults
       })
@@ -375,7 +369,7 @@ describe('4. Use of env_file', () => {
     let services
 
     before(() => {
-      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername })
+      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername, scmDomain })
       .then(({ results: servicesResults, envFiles }) => {
         services = servicesResults
       })
@@ -448,7 +442,7 @@ describe('4. Use of env_file', () => {
     let services
 
     before(() => {
-      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername, dockerComposeFilePath })
+      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername, scmDomain, dockerComposeFilePath })
       .then(({ results: servicesResults }) => {
         services = servicesResults
       })
@@ -490,7 +484,7 @@ describe('5. Links and aliases', () => {
     let services
 
     before(() => {
-      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername })
+      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername, scmDomain })
       .then(({ results: servicesResults, envFiles }) => {
         services = servicesResults
       })
@@ -584,6 +578,77 @@ describe('5. Links and aliases', () => {
           `RETHINKDB_4_2=three-changing-the-hostname`
         ])
       })
+    })
+  })
+})
+
+describe('6. Build GitHub repos', () => {
+  describe('6.1: Build from GitHub Repo', () => {
+    const repositoryName = 'compose-test-repo-6.1'
+    const { dockerComposeFileString } = getDockerFile(repositoryName)
+    let services
+
+    before(() => {
+      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername, scmDomain })
+      .then(({ results: servicesResults }) => {
+        services = servicesResults
+      })
+    })
+
+    it('should return one instance', () => {
+      expect(services).to.have.lengthOf(1)
+    })
+
+    it('should return the correct `buildDockerfilePath`', () => {
+      expect(services).to.have.deep.property('[0].buildDockerfilePath')
+      expect(services[0].buildDockerfilePath).to.equal('/Dockerfile')
+    })
+
+    it('should return the correct `code`', () => {
+      expect(services).to.have.deep.property('[0].code')
+      expect(services[0].code.repo).to.equal('RunnableTest/node-starter')
+      expect(services[0].code.commitish).to.equal(undefined)
+    })
+
+    it('should return the correct ports', () => {
+      expect(services).to.have.deep.property('[0].instance.ports')
+      expect(services[0].instance.ports).to.be.an.array
+      expect(services[0].instance.ports[0]).to.be.a.number
+      expect(services[0].instance.ports[0]).to.equal(7890)
+    })
+  })
+  describe('6.2: Build from GitHub Repo with commitish', () => {
+    const repositoryName = 'compose-test-repo-6.2'
+    const { dockerComposeFileString } = getDockerFile(repositoryName)
+    let services
+
+    before(() => {
+      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername, scmDomain })
+      .then(({ results: servicesResults }) => {
+        services = servicesResults
+      })
+    })
+
+    it('should return one instance', () => {
+      expect(services).to.have.lengthOf(1)
+    })
+
+    it('should return the correct `buildDockerfilePath`', () => {
+      expect(services).to.have.deep.property('[0].buildDockerfilePath')
+      expect(services[0].buildDockerfilePath).to.equal('/Dockerfile')
+    })
+
+    it('should return the correct `code`', () => {
+      expect(services).to.have.deep.property('[0].code')
+      expect(services[0].code.repo).to.equal('RunnableTest/node-starter')
+      expect(services[0].code.commitish).to.equal('dark-theme')
+    })
+
+    it('should return the correct ports', () => {
+      expect(services).to.have.deep.property('[0].instance.ports')
+      expect(services[0].instance.ports).to.be.an.array
+      expect(services[0].instance.ports[0]).to.be.a.number
+      expect(services[0].instance.ports[0]).to.equal(7890)
     })
   })
 })
