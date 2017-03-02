@@ -84,12 +84,12 @@ There are three types of tests:
 ### Adding Submmodules
 
 1. Go into `test/resps/${NAME}`
-1. Run `git init`
-2. Run `git add -A`
-1. Run `git commit -m ""`
-1. Create repo in github
-1. Push changes to github
-1. `rm -rf test/repos/${Name}` (It's in github, don't worry)
-1. git submodule add git@github.com:RunnableTest/${NAME}.git test/repos/${Name}
-1. Run `git status` and make sure repo was added to `.gitmodules` and was added
-1. Add + Commit + Push octobear repo
+2. Run `git init`
+3. Run `git add -A`
+4. Run `git commit -m ""`
+5. Create repo in github
+6. Push changes to github
+7. `rm -rf test/repos/${NAME}` (It's in github, don't worry)
+8. git submodule add git@github.com:RunnableTest/${NAME}.git test/repos/${NAME}
+9. Run `git status` and make sure repo was added to `.gitmodules` and was added
+10. Add + Commit + Push octobear repo

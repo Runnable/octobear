@@ -58,7 +58,7 @@ describe('Parser', () => {
     })
   })
 
-  describe('#buildRemoveCodeParser', () => {
+  describe('#buildRemoteCodeParser', () => {
     let warnings
     let build
     let scmDomain
@@ -70,31 +70,31 @@ describe('Parser', () => {
 
     it('should return `null` if there is no build', () => {
       build = null
-      const result = Parser.buildRemoveCodeParser({ build, scmDomain, warnings })
+      const result = Parser.buildRemoteCodeParser({ build, scmDomain, warnings })
       expect(result).to.equal(null)
     })
 
     it('should throw a warning if build args are passed', () => {
       build = { args: ['WOW=1'], context: 'https://github.com/Runnable/node-starter' }
-      Parser.buildRemoveCodeParser({ build, scmDomain, warnings })
+      Parser.buildRemoteCodeParser({ build, scmDomain, warnings })
       expect(Array.from(warnings)[0].args).to.deep.equal(['WOW=1'])
     })
 
     it('should return `undefined` if non github url', () => {
       build = { args: ['WOW=1'], context: 'hello' }
-      const result = Parser.buildRemoveCodeParser({ build, scmDomain, warnings })
+      const result = Parser.buildRemoteCodeParser({ build, scmDomain, warnings })
       expect(result).to.equal(undefined)
     })
 
     it('should return `undefined` if non github url', () => {
       build = 'hello'
-      const result = Parser.buildRemoveCodeParser({ build, scmDomain, warnings })
+      const result = Parser.buildRemoteCodeParser({ build, scmDomain, warnings })
       expect(result).to.equal(undefined)
     })
 
     it('should return `Runnable/node-starter`', () => {
       build = { context: 'https://github.com/Runnable/node-starter' }
-      const result = Parser.buildRemoveCodeParser({ build, scmDomain, warnings })
+      const result = Parser.buildRemoteCodeParser({ build, scmDomain, warnings })
       expect(result).to.deep.equal({
         repo: 'Runnable/node-starter',
         commitish: null
@@ -103,7 +103,7 @@ describe('Parser', () => {
 
     it('should return `Runnable/node-starter` and `feature1`', () => {
       build = { context: 'https://github.com/Runnable/node-starter#feature1' }
-      const result = Parser.buildRemoveCodeParser({ build, scmDomain, warnings })
+      const result = Parser.buildRemoteCodeParser({ build, scmDomain, warnings })
       expect(result).to.deep.equal({
         repo: 'Runnable/node-starter',
         commitish: 'feature1'
@@ -112,7 +112,7 @@ describe('Parser', () => {
 
     it('should return `Runnable/node-starter`', () => {
       build = 'https://github.com/Runnable/node-starter'
-      const result = Parser.buildRemoveCodeParser({ build, scmDomain, warnings })
+      const result = Parser.buildRemoteCodeParser({ build, scmDomain, warnings })
       expect(result).to.deep.equal({
         repo: 'Runnable/node-starter',
         commitish: null
@@ -121,7 +121,7 @@ describe('Parser', () => {
 
     it('should return `Runnable/node-starter` and `feature1`', () => {
       build = 'https://github.com/Runnable/node-starter#feature1'
-      const result = Parser.buildRemoveCodeParser({ build, scmDomain, warnings })
+      const result = Parser.buildRemoteCodeParser({ build, scmDomain, warnings })
       expect(result).to.deep.equal({
         repo: 'Runnable/node-starter',
         commitish: 'feature1'
