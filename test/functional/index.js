@@ -1,10 +1,12 @@
 'use strict'
 require('loadenv')()
-const { parse } = require('index')
+const { parse, populateENVsFromFiles } = require('index')
 const { expect } = require('chai')
 const fs = require('fs')
 const path = require('path')
 const sanitizeName = require('../util').sanitizeName
+const getDockerFile = require('../util').getDockerFile
+const getAllENVFiles = require('../util').getAllENVFiles
 
 const userContentDomain = 'runnable.ninja'
 const ownerUsername = process.env.GITHUB_USERNAME
@@ -12,8 +14,7 @@ const ownerUsername = process.env.GITHUB_USERNAME
 describe('1. Instance with Dockerfile', () => {
   describe('1.1: Simple Docker Compose File', () => {
     const repositoryName = 'compose-test-repo-1.1'
-    const dockerComposeFilePath = path.join(__dirname, `../repos/${repositoryName}/docker-compose.yml`)
-    const dockerComposeFileString = fs.readFileSync(dockerComposeFilePath).toString()
+    const { dockerComposeFileString } = getDockerFile(repositoryName)
     let services
 
     before(() => {
@@ -42,8 +43,7 @@ describe('1. Instance with Dockerfile', () => {
 
   describe('1.2: Dockerfile in other location + Different ports', () => {
     const repositoryName = 'compose-test-repo-1.2'
-    const dockerComposeFilePath = path.join(__dirname, `../repos/${repositoryName}/docker-compose.yml`)
-    const dockerComposeFileString = fs.readFileSync(dockerComposeFilePath).toString()
+    const { dockerComposeFileString } = getDockerFile(repositoryName)
     let services
 
     before(() => {
@@ -87,8 +87,7 @@ describe('1. Instance with Dockerfile', () => {
 
   describe('1.3: Dockerfile with context + container start command', () => {
     const repositoryName = 'compose-test-repo-1.3'
-    const dockerComposeFilePath = path.join(__dirname, `../repos/${repositoryName}/docker-compose.yml`)
-    const dockerComposeFileString = fs.readFileSync(dockerComposeFilePath).toString()
+    const { dockerComposeFileString } = getDockerFile(repositoryName)
     let services
 
     before(() => {
@@ -145,8 +144,7 @@ describe('1. Instance with Dockerfile', () => {
 describe('2. Instance with Image', () => {
   describe('2.1', () => {
     const repositoryName = 'compose-test-repo-2.1'
-    const dockerComposeFilePath = path.join(__dirname, `../repos/${repositoryName}/docker-compose.yml`)
-    const dockerComposeFileString = fs.readFileSync(dockerComposeFilePath).toString()
+    const { dockerComposeFileString } = getDockerFile(repositoryName)
     let services
 
     before(() => {
@@ -157,20 +155,30 @@ describe('2. Instance with Image', () => {
     })
 
     it('should have the right number of services', () => {
-      expect(services).to.have.lengthOf(1)
+      expect(services).to.have.lengthOf(2)
     })
 
-    it('should not return a `dockerBuildPath`', () => {
+    it('should not return a `dockerBuildPath` on either', () => {
       expect(services).to.have.deep.property('[0].contextVersion')
       expect(services[0].contextVersion).to.not.have.property('buildDockerfilePath')
+      expect(services).to.have.deep.property('[1].contextVersion')
+      expect(services[1].contextVersion).to.not.have.property('buildDockerfilePath')
     })
 
-    it('should return a `files` object', () => {
+    it('should return a `files` object for the normal entry', () => {
       expect(services).to.have.deep.property('[0].files')
       const files = services[0].files
       expect(files).to.have.property('/Dockerfile')
       expect(files['/Dockerfile'].body).to.match(/FROM/)
       expect(files['/Dockerfile'].body).to.match(/dtestops\/mysql:5.7/)
+    })
+
+    it('should return a `files` object from the default main we had to create', () => {
+      expect(services).to.have.deep.property('[1].files')
+      const files = services[1].files
+      expect(files).to.have.property('/Dockerfile')
+      expect(files['/Dockerfile'].body).to.match(/FROM/)
+      expect(files['/Dockerfile'].body).to.match(/busybox/)
     })
 
     it('should the environment variables', () => {
@@ -193,8 +201,7 @@ describe('2. Instance with Image', () => {
 describe('3. Multiple Instances with linking', () => {
   describe('3.1: Multiple Instances (Node and DB)', () => {
     const repositoryName = 'compose-test-repo-3.1'
-    const dockerComposeFilePath = path.join(__dirname, `../repos/${repositoryName}/docker-compose.yml`)
-    const dockerComposeFileString = fs.readFileSync(dockerComposeFilePath).toString()
+    const { dockerComposeFileString } = getDockerFile(repositoryName)
     let services
 
     before(() => {
@@ -254,8 +261,7 @@ describe('3. Multiple Instances with linking', () => {
 
   describe('3.2: Hello Node `depends_on`', () => {
     const repositoryName = 'compose-test-repo-3.2'
-    const dockerComposeFilePath = path.join(__dirname, `../repos/${repositoryName}/docker-compose.yml`)
-    const dockerComposeFileString = fs.readFileSync(dockerComposeFilePath).toString()
+    const { dockerComposeFileString } = getDockerFile(repositoryName)
     let services
 
     before(() => {
@@ -282,8 +288,7 @@ describe('3. Multiple Instances with linking', () => {
 
   describe('3.3: Strict dependencies', () => {
     const repositoryName = 'compose-test-repo-3.3'
-    const dockerComposeFilePath = path.join(__dirname, `../repos/${repositoryName}/docker-compose.yml`)
-    const dockerComposeFileString = fs.readFileSync(dockerComposeFilePath).toString()
+    const { dockerComposeFileString } = getDockerFile(repositoryName)
     let services
 
     before(() => {
@@ -315,6 +320,265 @@ describe('3. Multiple Instances with linking', () => {
         expect(services[1].instance.env).to.deep.equal([
           `RETHINKDB=rethinkdb`,
           `REDIS=${hostname}`
+        ])
+      })
+    })
+  })
+})
+
+describe('4. Use of env_file', () => {
+  describe('4.1: Hello Node `depends_on`', () => {
+    const repositoryName = 'compose-test-repo-4.1'
+    const { dockerComposeFileString } = getDockerFile(repositoryName)
+    let services
+
+    before(() => {
+      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername })
+      .then(({ results: servicesResults }) => {
+        services = servicesResults
+      })
+    })
+
+    it('should have 3 services', () => {
+      expect(services).to.have.lengthOf(3)
+    })
+
+    describe('Main Instance', () => {
+      it('should return the correct initial ENVs', () => {
+        expect(services).to.not.have.deep.property('[0].instance.env')
+      })
+
+      it('should have the correct metadata for the env files and ENV mappings', () => {
+        expect(services[0].metadata.envFiles).to.deep.equal([ '.env' ])
+        expect(services[0].metadata.links).to.deep.equal([ 'db', 'db1' ])
+      })
+
+      it('should correctly apply those ENV mappings when provided the files', () => {
+        const envFiles = getAllENVFiles(services[0].metadata.envFiles, repositoryName)
+        const hostname1 = `${sanitizeName(repositoryName)}-db1-staging-${ownerUsername.toLowerCase()}.${userContentDomain}`
+        const hostname2 = `${sanitizeName(repositoryName)}-db-staging-${ownerUsername.toLowerCase()}.${userContentDomain}`
+        return populateENVsFromFiles(services, envFiles)
+          .then(services => {
+            expect(services).to.have.deep.property('[0].instance.env')
+            expect(services[0].instance.env).to.deep.equal([
+              `RETHINKDB=${hostname1}`,
+              `DB_PORT=tcp://${hostname2}:5432`
+            ])
+          })
+      })
+    })
+  })
+
+  describe('4.2 mutliple files in diff directories', () => {
+    const repositoryName = 'compose-test-repo-4.2'
+    const { dockerComposeFileString } = getDockerFile(repositoryName)
+    let services
+
+    before(() => {
+      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername })
+      .then(({ results: servicesResults, envFiles }) => {
+        services = servicesResults
+      })
+    })
+
+    it('should have 3 services', () => {
+      expect(services).to.have.lengthOf(3)
+    })
+
+    describe('Main Instance', () => {
+      it('should return the correct ENVs', () => {
+        expect(services).to.have.deep.property('[0].instance.env')
+        expect(services[0].instance.env).to.deep.equal([
+          `ENVIRONMENT=staging`
+        ])
+      })
+
+      it('should have the correct metadata for the env files and ENV mappings', () => {
+        expect(services[0].metadata.envFiles).to.deep.equal([ 'env/some-environment-name/.env', 'env/some-environment-name/another-env-file.txt' ])
+        expect(services[0].metadata.links).to.deep.equal([ 'rethinkdb' ])
+      })
+    })
+
+    describe('Secondary Instance', () => {
+      it('should return the correct ENVs', () => {
+        expect(services).to.not.have.deep.property('[1].instance.env')
+      })
+
+      it('should have the correct metadata for the env files and ENV mappings', () => {
+        expect(services[1].metadata.envFiles).to.deep.equal([ 'env/some-environment-name/.env', 'env/some-environment-name/another-env-file.txt' ])
+        expect(services[1].metadata.links).to.deep.equal([ 'redis' ])
+      })
+    })
+
+    describe('After Parsing ENVs', () => {
+      before(() => {
+        const envFiles = getAllENVFiles(services[0].metadata.envFiles, repositoryName)
+        return populateENVsFromFiles(services, envFiles)
+          .then(res => {
+            services = res
+          })
+      })
+
+      it('should correctly apply those ENV mappings when provided the files', () => {
+        const hostname = `${sanitizeName(repositoryName)}-rethinkdb-staging-${ownerUsername.toLowerCase()}.${userContentDomain}`
+        expect(services).to.have.deep.property('[0].instance.env')
+        expect(services[0].instance.env).to.deep.equal([
+          `ENVIRONMENT=staging`,
+          `RETHINKDB=${hostname}`,
+          `REDIS=redis`
+        ])
+      })
+
+      it('should correctly apply those ENV mappings when provided the files', () => {
+        const hostname = `${sanitizeName(repositoryName)}-redis-staging-${ownerUsername.toLowerCase()}.${userContentDomain}`
+        expect(services).to.have.deep.property('[0].instance.env')
+        expect(services[1].instance.env).to.deep.equal([
+          `RETHINKDB=rethinkdb`,
+          `REDIS=${hostname}`
+        ])
+      })
+    })
+  })
+
+  describe('4.3: Relative Paths', () => {
+    const repositoryName = 'compose-test-repo-4.3'
+    const dockerComposeFilePath = 'docker/compose.yml'
+    const absoluteDockerComposeFilePath = path.join(__dirname, `../repos/${repositoryName}/${dockerComposeFilePath}`)
+    const dockerComposeFileString = fs.readFileSync(absoluteDockerComposeFilePath).toString()
+    let services
+
+    before(() => {
+      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername, dockerComposeFilePath })
+      .then(({ results: servicesResults }) => {
+        services = servicesResults
+      })
+    })
+
+    it('should have a single service', () => {
+      expect(services).to.have.lengthOf(1)
+    })
+
+    describe('Main Instance', () => {
+      it('should return the correct initial ENVs', () => {
+        expect(services).to.not.have.deep.property('[0].instance.env')
+      })
+
+      it('should have the correct metadata for the env files and ENV mappings', () => {
+        expect(services[0].metadata.envFiles.slice().sort()).to.deep.equal([ '.env', 'docker/.env', 'src/.env' ].sort())
+      })
+
+      it('should correctly apply those ENV mappings when provided the files', () => {
+        const envFiles = getAllENVFiles(services[0].metadata.envFiles, null, `repos/${repositoryName}/`)
+        return populateENVsFromFiles(services, envFiles)
+          .then(services => {
+            expect(services).to.have.deep.property('[0].instance.env')
+            expect(services[0].instance.env).to.deep.equal([
+              `ENV1=true`, // ENV in docker/.env
+              `ENV2=true`, // ENV in .env
+              `ENV3=true`  // ENV in src/.env
+            ])
+          })
+      })
+    })
+  })
+})
+
+describe('5. Links and aliases', () => {
+  describe('5.1', () => {
+    const repositoryName = 'compose-test-repo-5.1'
+    const { dockerComposeFileString } = getDockerFile(repositoryName)
+    let services
+
+    before(() => {
+      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername })
+      .then(({ results: servicesResults, envFiles }) => {
+        services = servicesResults
+      })
+    })
+
+    it('should have 5 services', () => {
+      expect(services).to.have.lengthOf(5)
+    })
+
+    describe('Main Instance', () => {
+      it('should have the correct aliases in the instances property', () => {
+        expect(services).to.have.deep.property('[0].instance.aliases')
+        expect(services[0].instance.aliases).to.be.an.object
+      })
+
+      it('should have the correct links', () => {
+        expect(services).to.have.deep.property('[0].metadata.links')
+        expect(services[0].metadata.links).to.deep.equal([
+          'rethinkdb1',
+          'rethinkdb2',
+          'rethinkdb3',
+          'rethinkdb4'
+        ])
+      })
+
+      it('should have the correct aliases in the instances property', () => {
+        expect(services[0].instance.aliases).to.deep.equal({
+          'cmV0aGlua2RiMQ==': {
+            'alias': 'rethinkdb1',
+            'instanceName': 'compose-test-repo-5-1-rethinkdb1'
+          },
+          'cmV0aGlua2RiMg==': {
+            'alias': 'rethinkdb2',
+            'instanceName': 'compose-test-repo-5-1-rethinkdb2'
+          },
+          'c29tZS13ZWlyZC1ob3N0': {
+            'alias': 'some-weird-host',
+            'instanceName': 'compose-test-repo-5-1-rethinkdb2'
+          },
+          'cmV0aGlua2RiMw==': {
+            'alias': 'rethinkdb3',
+            'instanceName': 'compose-test-repo-5-1-rethinkdb3'
+          },
+          'YW5vdGhlcjEuc3VwZXJfd2VpcmQuMDBob3N0': {
+            'alias': 'another1.super_weird.00host',
+            'instanceName': 'compose-test-repo-5-1-rethinkdb3'
+          },
+          'cmV0aGlua2RiNA==': {
+            'alias': 'rethinkdb4',
+            'instanceName': 'compose-test-repo-5-1-rethinkdb4'
+          },
+          'b21nLm5vdC5hbm90aGVyLm9uZQ==': {
+            'alias': 'omg.not.another.one',
+            'instanceName': 'compose-test-repo-5-1-rethinkdb4'
+          }
+        })
+      })
+
+      it('should not replace aliases with hostnames', () => {
+        const hostname = `${sanitizeName(repositoryName)}-rethinkdb3-staging-${ownerUsername.toLowerCase()}.${userContentDomain}`
+        expect(services).to.have.deep.property('[0].instance.env')
+        expect(services[0].instance.env).to.deep.equal([
+          `PORT=3000`,
+          `RETHINKDB_3_1=${hostname}`,
+          `RETHINKDB_3_2=another1.super_weird.00host`
+        ])
+      })
+    })
+
+    describe('After Parsing ENVs', () => {
+      before(() => {
+        const envFiles = getAllENVFiles(services[0].metadata.envFiles, repositoryName)
+        return populateENVsFromFiles(services, envFiles)
+          .then(res => {
+            services = res
+          })
+      })
+
+      it('should not replace aliases with hostnames', () => {
+        const hostname1 = `${sanitizeName(repositoryName)}-rethinkdb3-staging-${ownerUsername.toLowerCase()}.${userContentDomain}`
+        const hostname2 = `${sanitizeName(repositoryName)}-rethinkdb4-staging-${ownerUsername.toLowerCase()}.${userContentDomain}`
+        expect(services).to.have.deep.property('[0].instance.env')
+        expect(services[0].instance.env).to.deep.equal([
+          `PORT=3000`,
+          `RETHINKDB_3_1=${hostname1}`,
+          `RETHINKDB_3_2=another1.super_weird.00host`,
+          `RETHINKDB_4_1=${hostname2}`,
+          `RETHINKDB_4_2=omg.not.another.one`
         ])
       })
     })
