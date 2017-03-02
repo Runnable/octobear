@@ -44,3 +44,6 @@
 [submodule "test/repos/compose-test-repo-5.1"]
 	path = test/repos/compose-test-repo-5.1
 	url = git@github.com:RunnableTest/compose-test-repo-5.1.git
+[submodule "test/repos/compose-test-repo-6.1"]
+	path = test/repos/compose-test-repo-6.1
+	url = git@github.com:RunnableTest/compose-test-repo-6.1.git
