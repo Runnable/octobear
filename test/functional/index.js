@@ -648,7 +648,7 @@ describe('6. Build GitHub repos', () => {
     it('should return the correct `code`', () => {
       expect(services).to.have.deep.property('[0].code')
       expect(services[0].code.repo).to.equal('Runnable/node-starter')
-      expect(services[0].code.commitish).to.equal('feature1')
+      expect(services[0].code.commitish).to.equal('dark-theme')
     })
 
     it('should return the correct ports', () => {

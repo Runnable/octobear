@@ -1,6 +1,6 @@
 version: '2'
 services:
   web:
-    build: https://github.com/Runnable/node-starter#feature1
+    build: https://github.com/RunnableTest/node-starter#dark-theme
     ports:
       - "7890:7890"
