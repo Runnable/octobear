@@ -80,3 +80,16 @@ There are three types of tests:
 1. Unit: Used to test individual functions
 2. Functional: Used to test the complete flow of a function. This should not use any external services.
 3. Integration: Used to test results of parsing against the Runnable API
+
+### Adding Submmodules
+
+1. Go into `test/resps/${NAME}`
+1. Run `git init`
+2. Run `git add -A`
+1. Run `git commit -m ""`
+1. Create repo in github
+1. Push changes to github
+1. `rm -rf test/repos/${Name}` (It's in github, don't worry)
+1. git submodule add git@github.com:RunnableTest/${NAME}.git test/repos/${Name}
+1. Run `git status` and make sure repo was added to `.gitmodules` and was added
+1. Add + Commit + Push octobear repo
