@@ -7,15 +7,15 @@
     "test": "test"
   },
   "scripts": {
-    "test": "npm run lint && npm run coverage",
-    "coverage": "NODE_PATH=./lib NODE_ENV=test istanbul cover _mocha -- --recursive test/unit test/functional/ && npm run coverage-check",
-    "coverage-unit": "NODE_PATH=./lib NODE_ENV=test istanbul cover _mocha --dir coverage-unit -- --recursive test/unit",
-    "coverage-functional": "NODE_PATH=./lib NODE_ENV=test istanbul cover _mocha --dir coverage-unit -- --recursive test/functional",
+    "test": "GITHUB_USERNAME=runnabear npm run lint && npm run coverage",
+    "coverage": "GITHUB_USERNAME=runnabear  NODE_PATH=./lib NODE_ENV=test istanbul cover _mocha -- --recursive test/unit test/functional/ && npm run coverage-check",
+    "coverage-unit": "GITHUB_USERNAME=runnabear  NODE_PATH=./lib NODE_ENV=test istanbul cover _mocha --dir coverage-unit -- --recursive test/unit",
+    "coverage-functional": "GITHUB_USERNAME=runnabear  NODE_PATH=./lib NODE_ENV=test istanbul cover _mocha --dir coverage-unit -- --recursive test/functional",
     "coverage-check": "istanbul check-coverage --statement 100 --functions 100 --branches 100 --lines 100 && echo 'Coverage check successful!'",
     "lint": "standard --verbose",
-    "test-unit": "NODE_PATH=./lib NODE_ENV=test mocha --recursive test/unit/",
-    "test-functional": "NODE_PATH=./lib NODE_ENV=test mocha --recursive test/functional/",
-    "test-integration": "NODE_PATH=./lib NODE_ENV=test mocha-parallel-tests test/integration/**/*.js --timeout 30000 --max-parallel 10"
+    "test-unit": "GITHUB_USERNAME=runnabear NODE_PATH=./lib NODE_ENV=test mocha --recursive test/unit/",
+    "test-functional": "GITHUB_USERNAME=runnabear  NODE_PATH=./lib NODE_ENV=test mocha --recursive test/functional/",
+    "test-integration": "GITHUB_USERNAME=runnabear  NODE_PATH=./lib NODE_ENV=test mocha-parallel-tests test/integration/**/*.js --timeout 30000 --max-parallel 10"
   },
   "standard": {
     "globals": [

@@ -612,9 +612,9 @@ describe('6. Build GitHub repos', () => {
     })
 
     it('should return the correct `code`', () => {
-      expect(services).to.have.deep.property('[0].contextVersion.code')
-      expect(services[0].contextVersion.code.repo).to.equal('Runnable/node-starter')
-      expect(services[0].contextVersion.code.commitish).to.equal(null)
+      expect(services).to.have.deep.property('[0].code')
+      expect(services[0].code.repo).to.equal('Runnable/node-starter')
+      expect(services[0].code.commitish).to.equal(null)
     })
 
     it('should return the correct ports', () => {
@@ -646,9 +646,9 @@ describe('6. Build GitHub repos', () => {
     })
 
     it('should return the correct `code`', () => {
-      expect(services).to.have.deep.property('[0].contextVersion.code')
-      expect(services[0].contextVersion.code.repo).to.equal('Runnable/node-starter')
-      expect(services[0].contextVersion.code.commitish).to.equal('feature1')
+      expect(services).to.have.deep.property('[0].code')
+      expect(services[0].code.repo).to.equal('Runnable/node-starter')
+      expect(services[0].code.commitish).to.equal('feature1')
     })
 
     it('should return the correct ports', () => {
