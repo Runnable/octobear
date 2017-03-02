@@ -34,9 +34,9 @@ The response correspond to the following schema:
     // optional
 		code: {
 			repo: 'String', // repo full name
-      commitish: 'String' // Optional. Commit or branch
+                        commitish: 'String' // Optional. Commit or branch
 		}),
-    buildDockerfilePath: String // Optional. Path for Dockerfile used to build instance
+                buildDockerfilePath: String, // Optional. Path for Dockerfile used to build instance
 		files: { // Optional
 		 '/Dockerfile': {
 				body: String // Body for Dockerfile to be used. Only specified if there is  no `buildDockerfilePath`
