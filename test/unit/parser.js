@@ -37,13 +37,93 @@ describe('Parser', () => {
       expect(result).to.equal('/src/deep/wow/Dockerfile')
     })
 
-    it('should return `/src/some-other-name.Dockerfile`', () => {
+    it('should return `/src/deep/wow/wow-thats-awesome.Dockerfile`', () => {
       build = { context: '/src/deep/wow', dockerfile: 'wow-thats-awesome.Dockerfile' }
       const result = Parser.buildDockerfilePathParser({ build, warnings })
       expect(result).to.equal('/src/deep/wow/wow-thats-awesome.Dockerfile')
     })
+
+    it('should return `/Dockerfile`', () => {
+      build = { context: 'https://github.com/Runnable/node-starter' }
+      const result = Parser.buildDockerfilePathParser({ build, warnings })
+      expect(result).to.equal('/Dockerfile')
+    })
+
+    it('should return `/wow-thats-awesome.Dockerfile`', () => {
+      build = { context: 'https://github.com/Runnable/node-starter', dockerfile: 'wow-thats-awesome.Dockerfile' }
+      const result = Parser.buildDockerfilePathParser({ build, warnings })
+      expect(result).to.equal('/wow-thats-awesome.Dockerfile')
+    })
   })
 
+  describe('#buildRemoveCodeParser', () => {
+    let warnings
+    let build
+    beforeEach(() => {
+      build = '.'
+      warnings = new Warning()
+    })
+
+    it('should return `null` if there is no build', () => {
+      build = null
+      const result = Parser.buildRemoveCodeParser({ build, warnings })
+      expect(result).to.equal(null)
+    })
+
+    it('should throw a warning if build args are passed', () => {
+      build = { args: ['WOW=1'], context: 'https://github.com/Runnable/node-starter' }
+      Parser.buildRemoveCodeParser({ build, warnings })
+      expect(Array.from(warnings)[0].args).to.deep.equal(['WOW=1'])
+    })
+
+    it('should return `undefined` if non github url', () => {
+      build = { args: ['WOW=1'], context: 'hello' }
+      const result = Parser.buildRemoveCodeParser({ build, warnings })
+      expect(result).to.equal(undefined)
+    })
+
+    it('should return `undefined` if non github url', () => {
+      build = 'hello'
+      const result = Parser.buildRemoveCodeParser({ build, warnings })
+      expect(result).to.equal(undefined)
+    })
+
+    it('should return `Runnable/node-starter`', () => {
+      build = { context: 'https://github.com/Runnable/node-starter' }
+      const result = Parser.buildRemoveCodeParser({ build, warnings })
+      expect(result).to.deep.equal({
+        repo: 'Runnable/node-starter',
+        commitish: null
+      })
+    })
+
+    it('should return `Runnable/node-starter` and `feature1`', () => {
+      build = { context: 'https://github.com/Runnable/node-starter#feature1' }
+      const result = Parser.buildRemoveCodeParser({ build, warnings })
+      expect(result).to.deep.equal({
+        repo: 'Runnable/node-starter',
+        commitish: 'feature1'
+      })
+    })
+
+    it('should return `Runnable/node-starter`', () => {
+      build = 'https://github.com/Runnable/node-starter'
+      const result = Parser.buildRemoveCodeParser({ build, warnings })
+      expect(result).to.deep.equal({
+        repo: 'Runnable/node-starter',
+        commitish: null
+      })
+    })
+
+    it('should return `Runnable/node-starter` and `feature1`', () => {
+      build = 'https://github.com/Runnable/node-starter#feature1'
+      const result = Parser.buildRemoveCodeParser({ build, warnings })
+      expect(result).to.deep.equal({
+        repo: 'Runnable/node-starter',
+        commitish: 'feature1'
+      })
+    })
+  })
   describe('#portsParser', () => {
     let warnings
     let ports
