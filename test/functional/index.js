@@ -10,6 +10,7 @@ const getAllENVFiles = require('../util').getAllENVFiles
 
 const userContentDomain = 'runnable.ninja'
 const ownerUsername = process.env.GITHUB_USERNAME
+const scmDomain = 'github.com'
 
 describe('1. Instance with Dockerfile', () => {
   describe('1.1: Simple Docker Compose File', () => {
@@ -18,7 +19,7 @@ describe('1. Instance with Dockerfile', () => {
     let services
 
     before(() => {
-      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername })
+      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername, scmDomain })
       .then(({ results: servicesResults }) => {
         services = servicesResults
       })
@@ -47,7 +48,7 @@ describe('1. Instance with Dockerfile', () => {
     let services
 
     before(() => {
-      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername })
+      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername, scmDomain })
       .then(({ results: servicesResults }) => {
         services = servicesResults
       })
@@ -91,7 +92,7 @@ describe('1. Instance with Dockerfile', () => {
     let services
 
     before(() => {
-      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername })
+      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername, scmDomain })
       .then(({ results: servicesResults }) => {
         services = servicesResults
       })
@@ -124,7 +125,7 @@ describe('1. Instance with Dockerfile', () => {
     let services
 
     before(() => {
-      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername })
+      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername, scmDomain })
       .then(({ results: servicesResults }) => {
         services = servicesResults
       })
@@ -148,7 +149,7 @@ describe('2. Instance with Image', () => {
     let services
 
     before(() => {
-      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername })
+      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername, scmDomain })
       .then(({ results: servicesResults }) => {
         services = servicesResults
       })
@@ -205,7 +206,7 @@ describe('3. Multiple Instances with linking', () => {
     let services
 
     before(() => {
-      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername })
+      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername, scmDomain })
       .then(({ results: servicesResults }) => {
         services = servicesResults
       })
@@ -265,7 +266,7 @@ describe('3. Multiple Instances with linking', () => {
     let services
 
     before(() => {
-      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername })
+      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername, scmDomain })
       .then(({ results: servicesResults }) => {
         services = servicesResults
       })
@@ -292,7 +293,7 @@ describe('3. Multiple Instances with linking', () => {
     let services
 
     before(() => {
-      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername })
+      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername, scmDomain })
       .then(({ results: servicesResults }) => {
         services = servicesResults
       })
@@ -333,7 +334,7 @@ describe('4. Use of env_file', () => {
     let services
 
     before(() => {
-      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername })
+      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername, scmDomain })
       .then(({ results: servicesResults }) => {
         services = servicesResults
       })
@@ -375,7 +376,7 @@ describe('4. Use of env_file', () => {
     let services
 
     before(() => {
-      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername })
+      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername, scmDomain })
       .then(({ results: servicesResults, envFiles }) => {
         services = servicesResults
       })
@@ -448,7 +449,7 @@ describe('4. Use of env_file', () => {
     let services
 
     before(() => {
-      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername, dockerComposeFilePath })
+      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername, scmDomain, dockerComposeFilePath })
       .then(({ results: servicesResults }) => {
         services = servicesResults
       })
@@ -490,7 +491,7 @@ describe('5. Links and aliases', () => {
     let services
 
     before(() => {
-      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername })
+      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername, scmDomain })
       .then(({ results: servicesResults, envFiles }) => {
         services = servicesResults
       })
@@ -595,7 +596,7 @@ describe('6. Build GitHub repos', () => {
     let services
 
     before(() => {
-      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername })
+      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername, scmDomain })
       .then(({ results: servicesResults }) => {
         services = servicesResults
       })
@@ -629,7 +630,7 @@ describe('6. Build GitHub repos', () => {
     let services
 
     before(() => {
-      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername })
+      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername, scmDomain })
       .then(({ results: servicesResults }) => {
         services = servicesResults
       })

@@ -8,50 +8,52 @@ describe('Parser', () => {
   describe('#buildDockerfilePathParser', () => {
     let warnings
     let build
+    let scmDomain
     beforeEach(() => {
       build = '.'
+      scmDomain = 'github.com'
       warnings = new Warning()
     })
 
     it('should return `null` if there is no build', () => {
       build = null
-      const result = Parser.buildDockerfilePathParser({ build, warnings })
+      const result = Parser.buildDockerfilePathParser({ build, scmDomain, warnings })
       expect(result).to.equal(null)
     })
 
     it('should throw a warning if build args are passed', () => {
       build = { args: ['WOW=1'], context: '/src' }
-      Parser.buildDockerfilePathParser({ build, warnings })
+      Parser.buildDockerfilePathParser({ build, scmDomain, warnings })
       expect(Array.from(warnings)[0].args).to.deep.equal(['WOW=1'])
     })
 
     it('should return `/Dockerfile` if passed "."', () => {
       build = { args: ['WOW=1'], context: '/src' }
-      const result = Parser.buildDockerfilePathParser({ build, warnings })
+      const result = Parser.buildDockerfilePathParser({ build, scmDomain, warnings })
       expect(result).to.equal('/src/Dockerfile')
     })
 
     it('should return `/src/deep/wow/Dockerfile`', () => {
       build = { context: '/src/deep/wow' }
-      const result = Parser.buildDockerfilePathParser({ build, warnings })
+      const result = Parser.buildDockerfilePathParser({ build, scmDomain, warnings })
       expect(result).to.equal('/src/deep/wow/Dockerfile')
     })
 
     it('should return `/src/deep/wow/wow-thats-awesome.Dockerfile`', () => {
       build = { context: '/src/deep/wow', dockerfile: 'wow-thats-awesome.Dockerfile' }
-      const result = Parser.buildDockerfilePathParser({ build, warnings })
+      const result = Parser.buildDockerfilePathParser({ build, scmDomain, warnings })
       expect(result).to.equal('/src/deep/wow/wow-thats-awesome.Dockerfile')
     })
 
     it('should return `/Dockerfile`', () => {
       build = { context: 'https://github.com/Runnable/node-starter' }
-      const result = Parser.buildDockerfilePathParser({ build, warnings })
+      const result = Parser.buildDockerfilePathParser({ build, scmDomain, warnings })
       expect(result).to.equal('/Dockerfile')
     })
 
     it('should return `/wow-thats-awesome.Dockerfile`', () => {
       build = { context: 'https://github.com/Runnable/node-starter', dockerfile: 'wow-thats-awesome.Dockerfile' }
-      const result = Parser.buildDockerfilePathParser({ build, warnings })
+      const result = Parser.buildDockerfilePathParser({ build, scmDomain, warnings })
       expect(result).to.equal('/wow-thats-awesome.Dockerfile')
     })
   })
@@ -59,38 +61,40 @@ describe('Parser', () => {
   describe('#buildRemoveCodeParser', () => {
     let warnings
     let build
+    let scmDomain
     beforeEach(() => {
       build = '.'
+      scmDomain = 'github.com'
       warnings = new Warning()
     })
 
     it('should return `null` if there is no build', () => {
       build = null
-      const result = Parser.buildRemoveCodeParser({ build, warnings })
+      const result = Parser.buildRemoveCodeParser({ build, scmDomain, warnings })
       expect(result).to.equal(null)
     })
 
     it('should throw a warning if build args are passed', () => {
       build = { args: ['WOW=1'], context: 'https://github.com/Runnable/node-starter' }
-      Parser.buildRemoveCodeParser({ build, warnings })
+      Parser.buildRemoveCodeParser({ build, scmDomain, warnings })
       expect(Array.from(warnings)[0].args).to.deep.equal(['WOW=1'])
     })
 
     it('should return `undefined` if non github url', () => {
       build = { args: ['WOW=1'], context: 'hello' }
-      const result = Parser.buildRemoveCodeParser({ build, warnings })
+      const result = Parser.buildRemoveCodeParser({ build, scmDomain, warnings })
       expect(result).to.equal(undefined)
     })
 
     it('should return `undefined` if non github url', () => {
       build = 'hello'
-      const result = Parser.buildRemoveCodeParser({ build, warnings })
+      const result = Parser.buildRemoveCodeParser({ build, scmDomain, warnings })
       expect(result).to.equal(undefined)
     })
 
     it('should return `Runnable/node-starter`', () => {
       build = { context: 'https://github.com/Runnable/node-starter' }
-      const result = Parser.buildRemoveCodeParser({ build, warnings })
+      const result = Parser.buildRemoveCodeParser({ build, scmDomain, warnings })
       expect(result).to.deep.equal({
         repo: 'Runnable/node-starter',
         commitish: null
@@ -99,7 +103,7 @@ describe('Parser', () => {
 
     it('should return `Runnable/node-starter` and `feature1`', () => {
       build = { context: 'https://github.com/Runnable/node-starter#feature1' }
-      const result = Parser.buildRemoveCodeParser({ build, warnings })
+      const result = Parser.buildRemoveCodeParser({ build, scmDomain, warnings })
       expect(result).to.deep.equal({
         repo: 'Runnable/node-starter',
         commitish: 'feature1'
@@ -108,7 +112,7 @@ describe('Parser', () => {
 
     it('should return `Runnable/node-starter`', () => {
       build = 'https://github.com/Runnable/node-starter'
-      const result = Parser.buildRemoveCodeParser({ build, warnings })
+      const result = Parser.buildRemoveCodeParser({ build, scmDomain, warnings })
       expect(result).to.deep.equal({
         repo: 'Runnable/node-starter',
         commitish: null
@@ -117,7 +121,7 @@ describe('Parser', () => {
 
     it('should return `Runnable/node-starter` and `feature1`', () => {
       build = 'https://github.com/Runnable/node-starter#feature1'
-      const result = Parser.buildRemoveCodeParser({ build, warnings })
+      const result = Parser.buildRemoveCodeParser({ build, scmDomain, warnings })
       expect(result).to.deep.equal({
         repo: 'Runnable/node-starter',
         commitish: 'feature1'
