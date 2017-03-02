@@ -613,7 +613,7 @@ describe('6. Build GitHub repos', () => {
 
     it('should return the correct `code`', () => {
       expect(services).to.have.deep.property('[0].code')
-      expect(services[0].code.repo).to.equal('Runnable/node-starter')
+      expect(services[0].code.repo).to.equal('RunnableTest/node-starter')
       expect(services[0].code.commitish).to.equal(null)
     })
 
@@ -647,7 +647,7 @@ describe('6. Build GitHub repos', () => {
 
     it('should return the correct `code`', () => {
       expect(services).to.have.deep.property('[0].code')
-      expect(services[0].code.repo).to.equal('Runnable/node-starter')
+      expect(services[0].code.repo).to.equal('RunnableTest/node-starter')
       expect(services[0].code.commitish).to.equal('dark-theme')
     })
 
