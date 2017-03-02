@@ -587,3 +587,74 @@ describe('5. Links and aliases', () => {
     })
   })
 })
+
+describe('6. Build GitHub repos', () => {
+  describe('6.1: Build from GitHub Repo', () => {
+    const repositoryName = 'compose-test-repo-6.1'
+    const { dockerComposeFileString } = getDockerFile(repositoryName)
+    let services
+
+    before(() => {
+      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername })
+      .then(({ results: servicesResults }) => {
+        services = servicesResults
+      })
+    })
+
+    it('should return one instance', () => {
+      expect(services).to.have.lengthOf(1)
+    })
+
+    it('should return the correct `buildDockerfilePath`', () => {
+      expect(services).to.have.deep.property('[0].contextVersion.buildDockerfilePath')
+      expect(services[0].contextVersion.buildDockerfilePath).to.equal('/Dockerfile')
+    })
+
+    it('should return the correct `code`', () => {
+      expect(services).to.have.deep.property('[0].contextVersion.code')
+      expect(services[0].contextVersion.code.repo).to.equal('Runnable/node-starter')
+      expect(services[0].contextVersion.code.commitish).to.equal(null)
+    })
+
+    it('should return the correct ports', () => {
+      expect(services).to.have.deep.property('[0].instance.ports')
+      expect(services[0].instance.ports).to.be.an.array
+      expect(services[0].instance.ports[0]).to.be.a.number
+      expect(services[0].instance.ports[0]).to.equal(7890)
+    })
+  })
+  describe('6.2: Build from GitHub Repo with commitish', () => {
+    const repositoryName = 'compose-test-repo-6.2'
+    const { dockerComposeFileString } = getDockerFile(repositoryName)
+    let services
+
+    before(() => {
+      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername })
+      .then(({ results: servicesResults }) => {
+        services = servicesResults
+      })
+    })
+
+    it('should return one instance', () => {
+      expect(services).to.have.lengthOf(1)
+    })
+
+    it('should return the correct `buildDockerfilePath`', () => {
+      expect(services).to.have.deep.property('[0].contextVersion.buildDockerfilePath')
+      expect(services[0].contextVersion.buildDockerfilePath).to.equal('/Dockerfile')
+    })
+
+    it('should return the correct `code`', () => {
+      expect(services).to.have.deep.property('[0].contextVersion.code')
+      expect(services[0].contextVersion.code.repo).to.equal('Runnable/node-starter')
+      expect(services[0].contextVersion.code.commitish).to.equal('feature1')
+    })
+
+    it('should return the correct ports', () => {
+      expect(services).to.have.deep.property('[0].instance.ports')
+      expect(services[0].instance.ports).to.be.an.array
+      expect(services[0].instance.ports[0]).to.be.a.number
+      expect(services[0].instance.ports[0]).to.equal(7890)
+    })
+  })
+})

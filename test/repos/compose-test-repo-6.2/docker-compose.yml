@@ -1,0 +1,6 @@
+version: '2'
+services:
+  web:
+    build: https://github.com/Runnable/node-starter#feature1
+    ports:
+      - "7890:7890"
