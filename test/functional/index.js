@@ -651,4 +651,26 @@ describe('6. Build GitHub repos', () => {
       expect(services[0].instance.ports[0]).to.equal(7890)
     })
   })
+
+  describe('6.3: Picking the right master with github', () => {
+    const repositoryName = 'compose-test-repo-6.3'
+    const { dockerComposeFileString } = getDockerFile(repositoryName)
+    let services
+
+    before(() => {
+      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername, scmDomain })
+        .then(({ results: servicesResults }) => {
+          services = servicesResults
+        })
+    })
+
+    it('should return two instances', () => {
+      expect(services).to.have.lengthOf(2)
+    })
+
+    it('should set api to isMain', () => {
+      const api = services.find(service => service.metadata.name === 'api')
+      expect(api).to.have.deep.property('metadata.isMain', true)
+    })
+  })
 })
