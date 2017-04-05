@@ -75,6 +75,11 @@ In order to run tests locally you also need to pull submodules. The easiest way 
   git clone --recursive git@github.com:Runnable/octobear.git
 ```
 
+To update them, use
+```
+git submodule update --init --recursive
+```
+
 Also, in order to run tests locally you'll need populate the environment variables in `configs/.env`. We suggest adding them to `configs/.env.test`.
 
 There are three types of tests:
