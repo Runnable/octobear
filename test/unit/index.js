@@ -60,6 +60,47 @@ services:
     })
   })
 
+  describe('#_getMainName', () => {
+    let services
+    beforeEach(() => {
+      services = {
+        web: {
+          build: 'https://github.com/Runnable/test-compose'
+        },
+        api: {
+          build: 'git@github.com/Runnable/test-compose'
+        },
+        api2: {
+          build: '.'
+        },
+        database: {
+          image: 'asdasdasd'
+        },
+        web2: {
+          build: {
+            context: 'asdassad'
+          }
+        }
+      }
+    })
+
+    it('should pick api2 as main', done => {
+      expect(DockerComposeParser._getMainName(services)).to.equal('api2')
+      done()
+    })
+    it('should pick web2 if api2 isn\'t there', done => {
+      delete services.api2
+      expect(DockerComposeParser._getMainName(services)).to.equal('web2')
+      done()
+    })
+    it('should pick the first github if api2 and web2 aren\'t there', done => {
+      delete services.api2
+      delete services.web2
+      expect(DockerComposeParser._getMainName(services)).to.equal('web')
+      done()
+    })
+  })
+
   describe('#populateENVsFromFiles', () => {
     let services
     let envFilesMap
