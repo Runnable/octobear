@@ -36,8 +36,10 @@ The response correspond to the following schema:
 			repo: 'String', // repo full name
                         commitish: 'String' // Optional. Commit or branch
 		}),
-    buildDockerfilePath: String, // Optional. Path for Dockerfile used to build instance,
-    buildDockerContext: String, // Optional. Path for Docker build context
+    build: {
+      dockerFilePath: String, // Optional. Path for Dockerfile used to build instance,
+      dockerBuildContext: String, // Optional. Path for Docker build context
+    },
 		files: { // Optional
 		 '/Dockerfile': {
 				body: String // Body for Dockerfile to be used. Only specified if there is  no `buildDockerfilePath`
