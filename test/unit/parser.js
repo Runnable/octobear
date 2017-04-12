@@ -39,6 +39,13 @@ describe('Parser', () => {
       expect(result).to.equal('/src/deep/wow/Dockerfile')
     })
 
+    it('should return `git@github.com/DockerCon2017/api`', () => {
+      build = 'git@github.com/DockerCon2017/api.git'
+      scmDomain = 'api.github.com'
+      const result = Parser.buildDockerfilePathParser({ build, scmDomain, warnings })
+      expect(result).to.equal('/git@github.com/DockerCon2017/api/Dockerfile')
+    })
+
     it('should return `/src/deep/wow/wow-thats-awesome.Dockerfile`', () => {
       build = { context: '/src/deep/wow', dockerfile: 'wow-thats-awesome.Dockerfile' }
       const result = Parser.buildDockerfilePathParser({ build, scmDomain, warnings })
