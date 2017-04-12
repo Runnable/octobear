@@ -687,4 +687,29 @@ describe('6. Build GitHub repos', () => {
       expect(api).to.have.deep.property('metadata.isMain', true)
     })
   })
+  describe('7. Support Build Contexts', () => {
+    describe('7.1: Compose and Dockerfile are in different folders', () => {
+      const repositoryName = 'compose-test-repo-7.1'
+      const { dockerComposeFileString } = getDockerFile(repositoryName)
+      let services
+
+      before(() => {
+        return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername, scmDomain })
+        .then(({ results: servicesResults }) => {
+          services = servicesResults
+        })
+      })
+
+      it('should return one instance', () => {
+        expect(services).to.have.lengthOf(1)
+      })
+
+      it('should return the correct `dockerFilePath` and `dockerBuildContext`', () => {
+        expect(services).to.have.deep.property('[0].build.dockerFilePath')
+        expect(services).to.have.deep.property('[0].build.dockerBuildContext')
+        expect(services[0].build.dockerFilePath).to.equal('/docker/not-so-dockerfile.Dockerfile')
+        expect(services[0].build.dockerBuildContext).to.equal('.')
+      })
+    })
+  })
 })
