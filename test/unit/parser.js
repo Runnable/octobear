@@ -58,6 +58,40 @@ describe('Parser', () => {
     })
   })
 
+  describe('#buildDockerContextParser', () => {
+    let warnings
+    let build
+    let scmDomain
+    beforeEach(() => {
+      build = '.'
+      scmDomain = 'github.com'
+      warnings = new Warning()
+    })
+
+    it('should return `null` if there is no build', () => {
+      build = null
+      const result = Parser.buildDockerContextParser({ build, scmDomain, warnings })
+      expect(result).to.equal(null)
+    })
+
+    it('should throw a warning if build args are passed', () => {
+      build = { args: ['WOW=1'], context: '/src' }
+      Parser.buildDockerContextParser({ build, scmDomain, warnings })
+      expect(Array.from(warnings)[0].args).to.deep.equal(['WOW=1'])
+    })
+
+    it('should return `..`', () => {
+      build = { context: '../docker' }
+      const result = Parser.buildDockerContextParser({ build, scmDomain, warnings })
+      expect(result).to.equal('../docker')
+    })
+
+    it('should return `null`', () => {
+      build = { context: 'https://github.com/Runnable/node-starter', dockerfile: 'wow-thats-awesome.Dockerfile' }
+      const result = Parser.buildDockerContextParser({ build, scmDomain, warnings })
+      expect(result).to.equal(undefined)
+    })
+  })
   describe('#buildRemoteCodeParser', () => {
     let warnings
     let build
