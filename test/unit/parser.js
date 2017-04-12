@@ -5,7 +5,7 @@ const Parser = require('parser')
 const Warning = require('warning')
 
 describe('Parser', () => {
-  describe('#buildDockerfilePathParser', () => {
+  describe('#dockerBuildParser', () => {
     let warnings
     let build
     let scmDomain
@@ -17,81 +17,53 @@ describe('Parser', () => {
 
     it('should return `null` if there is no build', () => {
       build = null
-      const result = Parser.buildDockerfilePathParser({ build, scmDomain, warnings })
+      const result = Parser.dockerBuildParser({ build, scmDomain, warnings })
       expect(result).to.equal(null)
     })
 
     it('should throw a warning if build args are passed', () => {
       build = { args: ['WOW=1'], context: '/src' }
-      Parser.buildDockerfilePathParser({ build, scmDomain, warnings })
+      Parser.dockerBuildParser({ build, scmDomain, warnings })
       expect(Array.from(warnings)[0].args).to.deep.equal(['WOW=1'])
     })
 
-    it('should return `/Dockerfile` if passed "."', () => {
+    it('should return `/Dockerfile` if passed "/src"', () => {
       build = { args: ['WOW=1'], context: '/src' }
-      const result = Parser.buildDockerfilePathParser({ build, scmDomain, warnings })
-      expect(result).to.equal('/src/Dockerfile')
+      const result = Parser.dockerBuildParser({ build, scmDomain, warnings })
+      expect(result.dockerFilePath).to.equal('/src/Dockerfile')
     })
 
-    it('should return `/src/deep/wow/Dockerfile`', () => {
+    it('should return correct context if passed "/src"', () => {
+      build = { args: ['WOW=1'], context: '/src' }
+      const result = Parser.dockerBuildParser({ build, scmDomain, warnings })
+      expect(result.dockerBuildContext).to.equal('/src')
+    })
+
+    it('should return `/Dockerfile`', () => {
       build = { context: '/src/deep/wow' }
-      const result = Parser.buildDockerfilePathParser({ build, scmDomain, warnings })
-      expect(result).to.equal('/src/deep/wow/Dockerfile')
+      const result = Parser.dockerBuildParser({ build, scmDomain, warnings })
+      expect(result.dockerFilePath).to.equal('/src/deep/wow/Dockerfile')
     })
 
-    it('should return `/src/deep/wow/wow-thats-awesome.Dockerfile`', () => {
+    it('should return `/wow-thats-awesome.Dockerfile`', () => {
       build = { context: '/src/deep/wow', dockerfile: 'wow-thats-awesome.Dockerfile' }
-      const result = Parser.buildDockerfilePathParser({ build, scmDomain, warnings })
-      expect(result).to.equal('/src/deep/wow/wow-thats-awesome.Dockerfile')
+      const result = Parser.dockerBuildParser({ build, scmDomain, warnings })
+      expect(result.dockerFilePath).to.equal('/src/deep/wow/wow-thats-awesome.Dockerfile')
     })
 
     it('should return `/Dockerfile`', () => {
       build = { context: 'https://github.com/Runnable/node-starter' }
-      const result = Parser.buildDockerfilePathParser({ build, scmDomain, warnings })
-      expect(result).to.equal('/Dockerfile')
+      const result = Parser.dockerBuildParser({ build, scmDomain, warnings })
+      expect(result.dockerFilePath).to.equal('/Dockerfile')
     })
 
     it('should return `/wow-thats-awesome.Dockerfile`', () => {
       build = { context: 'https://github.com/Runnable/node-starter', dockerfile: 'wow-thats-awesome.Dockerfile' }
-      const result = Parser.buildDockerfilePathParser({ build, scmDomain, warnings })
-      expect(result).to.equal('/wow-thats-awesome.Dockerfile')
+      const result = Parser.dockerBuildParser({ build, scmDomain, warnings })
+      expect(result.dockerFilePath).to.equal('/wow-thats-awesome.Dockerfile')
     })
   })
 
-  describe('#buildDockerContextParser', () => {
-    let warnings
-    let build
-    let scmDomain
-    beforeEach(() => {
-      build = '.'
-      scmDomain = 'github.com'
-      warnings = new Warning()
-    })
-
-    it('should return `null` if there is no build', () => {
-      build = null
-      const result = Parser.buildDockerContextParser({ build, scmDomain, warnings })
-      expect(result).to.equal(null)
-    })
-
-    it('should throw a warning if build args are passed', () => {
-      build = { args: ['WOW=1'], context: '/src' }
-      Parser.buildDockerContextParser({ build, scmDomain, warnings })
-      expect(Array.from(warnings)[0].args).to.deep.equal(['WOW=1'])
-    })
-
-    it('should return `..`', () => {
-      build = { context: '../docker' }
-      const result = Parser.buildDockerContextParser({ build, scmDomain, warnings })
-      expect(result).to.equal('../docker')
-    })
-
-    it('should return `null`', () => {
-      build = { context: 'https://github.com/Runnable/node-starter', dockerfile: 'wow-thats-awesome.Dockerfile' }
-      const result = Parser.buildDockerContextParser({ build, scmDomain, warnings })
-      expect(result).to.equal(undefined)
-    })
-  })
   describe('#buildRemoteCodeParser', () => {
     let warnings
     let build
