@@ -43,24 +43,44 @@ describe('Parser', () => {
       build = { context: '/src/deep/wow' }
       const result = Parser.dockerBuildParser({ build, scmDomain, warnings })
       expect(result.dockerFilePath).to.equal('/src/deep/wow/Dockerfile')
+      expect(result.dockerBuildContext).to.equal('/src/deep/wow')
     })
 
-    it('should return `/wow-thats-awesome.Dockerfile`', () => {
+    it('should return `Dockerfile` for github url', () => {
+      build = 'git@github.com/DockerCon2017/api.git'
+      scmDomain = 'github.com'
+      const result = Parser.dockerBuildParser({ build, scmDomain, warnings })
+      expect(result.dockerFilePath).to.equal('/Dockerfile')
+      expect(result.dockerBuildContext).to.equal(undefined)
+    })
+
+    it('should return full url for non supported scm doman', () => {
+      build = 'git@github.com/DockerCon2017/api.git'
+      scmDomain = 'bitbucket.org'
+      const result = Parser.dockerBuildParser({ build, scmDomain, warnings })
+      expect(result.dockerFilePath).to.equal('/git@github.com/DockerCon2017/api/Dockerfile')
+      expect(result.dockerBuildContext).to.equal('git@github.com/DockerCon2017/api')
+    })
+
+    it('should return `/src/deep/wow/wow-thats-awesome.Dockerfile`', () => {
       build = { context: '/src/deep/wow', dockerfile: 'wow-thats-awesome.Dockerfile' }
       const result = Parser.dockerBuildParser({ build, scmDomain, warnings })
       expect(result.dockerFilePath).to.equal('/src/deep/wow/wow-thats-awesome.Dockerfile')
+      expect(result.dockerBuildContext).to.equal('/src/deep/wow')
     })
 
     it('should return `/Dockerfile`', () => {
       build = { context: 'https://github.com/Runnable/node-starter' }
       const result = Parser.dockerBuildParser({ build, scmDomain, warnings })
       expect(result.dockerFilePath).to.equal('/Dockerfile')
+      expect(result.dockerBuildContext).to.equal(undefined)
     })
 
     it('should return `/wow-thats-awesome.Dockerfile`', () => {
       build = { context: 'https://github.com/Runnable/node-starter', dockerfile: 'wow-thats-awesome.Dockerfile' }
       const result = Parser.dockerBuildParser({ build, scmDomain, warnings })
       expect(result.dockerFilePath).to.equal('/wow-thats-awesome.Dockerfile')
+      expect(result.dockerBuildContext).to.equal(undefined)
     })
   })
 
@@ -98,7 +118,7 @@ describe('Parser', () => {
       expect(result).to.equal(undefined)
     })
 
-    it('should return `Runnable/node-starter`', () => {
+    it('should return `Runnable/node-starter` for github url', () => {
       build = { context: 'https://github.com/Runnable/node-starter' }
       const result = Parser.buildRemoteCodeParser({ build, scmDomain, warnings })
       expect(result).to.deep.equal({
@@ -107,7 +127,7 @@ describe('Parser', () => {
       })
     })
 
-    it('should return `Runnable/node-starter` and `feature1`', () => {
+    it('should return `Runnable/node-starter` and `feature1` for github url with branch', () => {
       build = { context: 'https://github.com/Runnable/node-starter#feature1' }
       const result = Parser.buildRemoteCodeParser({ build, scmDomain, warnings })
       expect(result).to.deep.equal({
@@ -116,8 +136,26 @@ describe('Parser', () => {
       })
     })
 
-    it('should return `Runnable/node-starter`', () => {
+    it('should return `Runnable/node-starter` for github url as build', () => {
       build = 'https://github.com/Runnable/node-starter'
+      const result = Parser.buildRemoteCodeParser({ build, scmDomain, warnings })
+      expect(result).to.deep.equal({
+        repo: 'Runnable/node-starter',
+        commitish: null
+      })
+    })
+
+    it('should return `Runnable/node-starter` for git url', () => {
+      build = { context: 'git@github.com:Runnable/node-starter.git' }
+      const result = Parser.buildRemoteCodeParser({ build, scmDomain, warnings })
+      expect(result).to.deep.equal({
+        repo: 'Runnable/node-starter',
+        commitish: null
+      })
+    })
+
+    it('should return `Runnable/node-starter` for git url as build', () => {
+      build = 'git@github.com:Runnable/node-starter.git'
       const result = Parser.buildRemoteCodeParser({ build, scmDomain, warnings })
       expect(result).to.deep.equal({
         repo: 'Runnable/node-starter',
