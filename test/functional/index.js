@@ -6,6 +6,7 @@ const fs = require('fs')
 const path = require('path')
 const sanitizeName = require('../util').sanitizeName
 const getDockerFile = require('../util').getDockerFile
+const getComposeFile = require('../util').getComposeFile
 const getAllENVFiles = require('../util').getAllENVFiles
 
 const userContentDomain = 'runnable.ninja'
@@ -688,7 +689,7 @@ describe('6. Build GitHub repos', () => {
     })
   })
   describe('7. Support Build Contexts', () => {
-    describe('7.1: Compose and Dockerfile are in different folders', () => {
+    describe('7.1: Compose in root and Dockerfile in folder', () => {
       const repositoryName = 'compose-test-repo-7.1'
       const { dockerComposeFileString } = getDockerFile(repositoryName)
       let services
@@ -709,6 +710,29 @@ describe('6. Build GitHub repos', () => {
         expect(services).to.have.deep.property('[0].build.dockerBuildContext')
         expect(services[0].build.dockerFilePath).to.equal('/docker/not-so-dockerfile.Dockerfile')
         expect(services[0].build.dockerBuildContext).to.equal('.')
+      })
+    })
+    describe('7.2: Compose and Dockerfile are in different subfolders', () => {
+      const repositoryName = 'compose-test-repo-7.2'
+      const { dockerComposeFileString } = getComposeFile(repositoryName, 'src/docker-compose.yml')
+      let services
+
+      before(() => {
+        return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername, scmDomain })
+        .then(({ results: servicesResults }) => {
+          services = servicesResults
+        })
+      })
+
+      it('should return one instance', () => {
+        expect(services).to.have.lengthOf(1)
+      })
+
+      it('should return the correct `dockerFilePath` and `dockerBuildContext`', () => {
+        expect(services).to.have.deep.property('[0].build.dockerFilePath')
+        expect(services).to.have.deep.property('[0].build.dockerBuildContext')
+        expect(services[0].build.dockerFilePath).to.equal('/docker/not-so-dockerfile.Dockerfile')
+        expect(services[0].build.dockerBuildContext).to.equal('..')
       })
     })
   })
