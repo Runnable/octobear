@@ -610,9 +610,9 @@ describe('6. Build GitHub repos', () => {
       expect(services).to.have.lengthOf(1)
     })
 
-    it('should return the correct `dockerFilePath` and `dockerBuildContext`', () => {
+    it('should return the correct `dockerFilePath` and no `dockerBuildContext`', () => {
       expect(services).to.have.deep.property('[0].build.dockerFilePath')
-      expect(services).to.have.deep.property('[0].build.dockerBuildContext')
+      expect(services).to.not.have.deep.property('[0].build.dockerBuildContext')
       expect(services[0].build.dockerFilePath).to.equal('/Dockerfile')
       expect(services[0].build.dockerBuildContext).to.equal(undefined)
     })
@@ -646,9 +646,9 @@ describe('6. Build GitHub repos', () => {
       expect(services).to.have.lengthOf(1)
     })
 
-    it('should return the correct `dockerFilePath` and `dockerBuildContext`', () => {
+    it('should return the correct `dockerFilePath` and no `dockerBuildContext`', () => {
       expect(services).to.have.deep.property('[0].build.dockerFilePath')
-      expect(services).to.have.deep.property('[0].build.dockerBuildContext')
+      expect(services).to.not.have.deep.property('[0].build.dockerBuildContext')
       expect(services[0].build.dockerFilePath).to.equal('/Dockerfile')
       expect(services[0].build.dockerBuildContext).to.equal(undefined)
     })
