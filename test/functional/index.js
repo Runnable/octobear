@@ -6,6 +6,7 @@ const fs = require('fs')
 const path = require('path')
 const sanitizeName = require('../util').sanitizeName
 const getDockerFile = require('../util').getDockerFile
+const getComposeFile = require('../util').getComposeFile
 const getAllENVFiles = require('../util').getAllENVFiles
 
 const userContentDomain = 'runnable.ninja'
@@ -29,9 +30,11 @@ describe('1. Instance with Dockerfile', () => {
       expect(services).to.have.lengthOf(1)
     })
 
-    it('should return the correct `buildDockerfilePath`', () => {
-      expect(services).to.have.deep.property('[0].buildDockerfilePath')
-      expect(services[0].buildDockerfilePath).to.equal('/Dockerfile')
+    it('should return the correct `dockerFilePath` and `dockerBuildContext`', () => {
+      expect(services).to.have.deep.property('[0].build.dockerFilePath')
+      expect(services).to.have.deep.property('[0].build.dockerBuildContext')
+      expect(services[0].build.dockerFilePath).to.equal('/Dockerfile')
+      expect(services[0].build.dockerBuildContext).to.equal('.')
     })
 
     it('should return the correct ports', () => {
@@ -58,10 +61,12 @@ describe('1. Instance with Dockerfile', () => {
       expect(services).to.have.lengthOf(1)
     })
 
-    it('should return the correct `buildDockerfilePath`', () => {
-      expect(services).to.have.deep.property('[0].instance.containerStartCommand')
+    it('should return the correct `dockerFilePath` and `dockerBuildContext`', () => {
+      expect(services).to.have.deep.property('[0].build.dockerFilePath')
+      expect(services).to.have.deep.property('[0].build.dockerBuildContext')
       expect(services).to.be.an.object
-      expect(services[0].buildDockerfilePath).to.equal('/src/Dockerfile')
+      expect(services[0].build.dockerFilePath).to.equal('/src/Dockerfile')
+      expect(services[0].build.dockerBuildContext).to.equal('./src/')
     })
 
     it('should return the correct `containerStartCommand`', () => {
@@ -102,9 +107,11 @@ describe('1. Instance with Dockerfile', () => {
       expect(services).to.have.lengthOf(1)
     })
 
-    it('should return the correct `buildDockerfilePath`', () => {
-      expect(services).to.have.deep.property('[0].buildDockerfilePath')
-      expect(services[0].buildDockerfilePath).to.equal('/src/not-so-dockerfile.Dockerfile')
+    it('should return the correct `dockerFilePath` and `dockerBuildContext`', () => {
+      expect(services).to.have.deep.property('[0].build.dockerFilePath')
+      expect(services).to.have.deep.property('[0].build.dockerBuildContext')
+      expect(services[0].build.dockerFilePath).to.equal('/src/not-so-dockerfile.Dockerfile')
+      expect(services[0].build.dockerBuildContext).to.equal('./src/')
     })
 
     it('should return the correct `containerStartCommand`', () => {
@@ -135,9 +142,11 @@ describe('1. Instance with Dockerfile', () => {
       expect(services).to.have.lengthOf(1)
     })
 
-    it('should return the correct `buildDockerfilePath`', () => {
-      expect(services).to.have.deep.property('[0].buildDockerfilePath')
-      expect(services[0].buildDockerfilePath).to.equal('/src/not-so-dockerfile.Dockerfile')
+    it('should return the correct `dockerFilePath` and `dockerBuildContext`', () => {
+      expect(services).to.have.deep.property('[0].build.dockerFilePath')
+      expect(services).to.have.deep.property('[0].build.dockerBuildContext')
+      expect(services[0].build.dockerFilePath).to.equal('/src/not-so-dockerfile.Dockerfile')
+      expect(services[0].build.dockerBuildContext).to.equal('../src/')
     })
   })
 })
@@ -219,9 +228,11 @@ describe('3. Multiple Instances with linking', () => {
         expect(services).to.have.deep.property('[0].metadata.isMain', true)
       })
 
-      it('should return a `dockerBuildPath`', () => {
-        expect(services).to.have.deep.property('[0].buildDockerfilePath')
-        expect(services[0].buildDockerfilePath).to.equal('/Dockerfile')
+      it('should return a `dockerFilePath` and `dockerBuildContext`', () => {
+        expect(services).to.have.deep.property('[0].build.dockerFilePath')
+        expect(services).to.have.deep.property('[0].build.dockerBuildContext')
+        expect(services[0].build.dockerFilePath).to.equal('/Dockerfile')
+        expect(services[0].build.dockerBuildContext).to.equal('.')
       })
 
       it('should return the right ports', () => {
@@ -599,9 +610,11 @@ describe('6. Build GitHub repos', () => {
       expect(services).to.have.lengthOf(1)
     })
 
-    it('should return the correct `buildDockerfilePath`', () => {
-      expect(services).to.have.deep.property('[0].buildDockerfilePath')
-      expect(services[0].buildDockerfilePath).to.equal('/Dockerfile')
+    it('should return the correct `dockerFilePath` and no `dockerBuildContext`', () => {
+      expect(services).to.have.deep.property('[0].build.dockerFilePath')
+      expect(services).to.not.have.deep.property('[0].build.dockerBuildContext')
+      expect(services[0].build.dockerFilePath).to.equal('/Dockerfile')
+      expect(services[0].build.dockerBuildContext).to.equal(undefined)
     })
 
     it('should return the correct `code`', () => {
@@ -633,9 +646,11 @@ describe('6. Build GitHub repos', () => {
       expect(services).to.have.lengthOf(1)
     })
 
-    it('should return the correct `buildDockerfilePath`', () => {
-      expect(services).to.have.deep.property('[0].buildDockerfilePath')
-      expect(services[0].buildDockerfilePath).to.equal('/Dockerfile')
+    it('should return the correct `dockerFilePath` and no `dockerBuildContext`', () => {
+      expect(services).to.have.deep.property('[0].build.dockerFilePath')
+      expect(services).to.not.have.deep.property('[0].build.dockerBuildContext')
+      expect(services[0].build.dockerFilePath).to.equal('/Dockerfile')
+      expect(services[0].build.dockerBuildContext).to.equal(undefined)
     })
 
     it('should return the correct `code`', () => {
@@ -671,6 +686,54 @@ describe('6. Build GitHub repos', () => {
     it('should set api to isMain', () => {
       const api = services.find(service => service.metadata.name === 'api')
       expect(api).to.have.deep.property('metadata.isMain', true)
+    })
+  })
+  describe('7. Support Build Contexts', () => {
+    describe('7.1: Compose in root and Dockerfile in folder', () => {
+      const repositoryName = 'compose-test-repo-7.1'
+      const { dockerComposeFileString } = getDockerFile(repositoryName)
+      let services
+
+      before(() => {
+        return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername, scmDomain })
+        .then(({ results: servicesResults }) => {
+          services = servicesResults
+        })
+      })
+
+      it('should return one instance', () => {
+        expect(services).to.have.lengthOf(1)
+      })
+
+      it('should return the correct `dockerFilePath` and `dockerBuildContext`', () => {
+        expect(services).to.have.deep.property('[0].build.dockerFilePath')
+        expect(services).to.have.deep.property('[0].build.dockerBuildContext')
+        expect(services[0].build.dockerFilePath).to.equal('/docker/not-so-dockerfile.Dockerfile')
+        expect(services[0].build.dockerBuildContext).to.equal('.')
+      })
+    })
+    describe('7.2: Compose and Dockerfile are in different subfolders', () => {
+      const repositoryName = 'compose-test-repo-7.2'
+      const { dockerComposeFileString } = getComposeFile(repositoryName, 'src/docker-compose.yml')
+      let services
+
+      before(() => {
+        return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername, scmDomain })
+        .then(({ results: servicesResults }) => {
+          services = servicesResults
+        })
+      })
+
+      it('should return one instance', () => {
+        expect(services).to.have.lengthOf(1)
+      })
+
+      it('should return the correct `dockerFilePath` and `dockerBuildContext`', () => {
+        expect(services).to.have.deep.property('[0].build.dockerFilePath')
+        expect(services).to.have.deep.property('[0].build.dockerBuildContext')
+        expect(services[0].build.dockerFilePath).to.equal('/docker/not-so-dockerfile.Dockerfile')
+        expect(services[0].build.dockerBuildContext).to.equal('..')
+      })
     })
   })
 })
