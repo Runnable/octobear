@@ -163,6 +163,15 @@ describe('Parser', () => {
       })
     })
 
+    it('should return `Runnable/node-starter` and `feature1` for git url with branch', () => {
+      build = { context: 'git@github.com:Runnable/node-starter.git#feature1' }
+      const result = Parser.buildRemoteCodeParser({ build, scmDomain, warnings })
+      expect(result).to.deep.equal({
+        repo: 'Runnable/node-starter',
+        commitish: 'feature1'
+      })
+    })
+
     it('should return `Runnable/node-starter` and `feature1`', () => {
       build = 'https://github.com/Runnable/node-starter#feature1'
       const result = Parser.buildRemoteCodeParser({ build, scmDomain, warnings })
