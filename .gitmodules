@@ -62,3 +62,6 @@
 [submodule "test/repos/compose-test-repo-7.2"]
 	path = test/repos/compose-test-repo-7.2
 	url = git@github.com:RunnableTest/compose-test-repo-7.2.git
+[submodule "test/repos/test/repos/compose-test-repo-8.1"]
+	path = test/repos/test/repos/compose-test-repo-8.1
+	url = git@github.com:RunnableTest/compose-test-repo-8.1.git
