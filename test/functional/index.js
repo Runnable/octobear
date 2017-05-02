@@ -736,4 +736,44 @@ describe('6. Build GitHub repos', () => {
       })
     })
   })
+  describe('8. Support Extends', () => {
+    describe('8.1: Parse extends', () => {
+      const repositoryName = 'compose-test-repo-8.1'
+      const { dockerComposeFileString } = getComposeFile(repositoryName, 'docker-compose.prod.yml')
+      let services
+
+      before(() => {
+        return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername, scmDomain })
+        .then(({ results: servicesResults }) => {
+          services = servicesResults
+        })
+      })
+
+      it('should return 3 instances', () => {
+        expect(services).to.have.lengthOf(3)
+      })
+
+      it('should return the correct `file` and `service`', () => {
+        expect(services).to.have.deep.property('[0].extends.service')
+        expect(services).to.have.deep.property('[0].extends.file')
+        expect(services).to.have.deep.property('[1].extends.service')
+        expect(services).to.have.deep.property('[1].extends.file')
+        expect(services[0].extends.service).to.equal('web')
+        expect(services[0].extends.file).to.equal('docker-compose.yml')
+        expect(services[1].extends.service).to.equal('rethinkdb')
+        expect(services[1].extends.file).to.equal('docker-compose.yml')
+      })
+
+      it('should find all related files', () => {
+        expect(services).to.have.deep.property('[0].extends.service')
+        expect(services).to.have.deep.property('[0].extends.file')
+        expect(services).to.have.deep.property('[1].extends.service')
+        expect(services).to.have.deep.property('[1].extends.file')
+        expect(services[0].extends.service).to.equal('web')
+        expect(services[0].extends.file).to.equal('docker-compose.yml')
+        expect(services[1].extends.service).to.equal('rethinkdb')
+        expect(services[1].extends.file).to.equal('docker-compose.yml')
+      })
+    })
+  })
 })

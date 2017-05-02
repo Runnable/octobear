@@ -31,6 +31,10 @@ The response correspond to the following schema:
 			name: String, // Name specified for service in `docker-compose.yml`
 			isMain: Boolean, // Wether this should be the instance for which a repo instance should be created
 		},
+    extends: {
+      service: 'String', // name to the service to extend
+      file: 'String' // path to the compose file where original service is registered
+    }
     // optional
 		code: {
 			repo: 'String', // repo full name
