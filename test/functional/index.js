@@ -808,17 +808,6 @@ describe('6. Build GitHub repos', () => {
         expect(webService.instance.ports).to.deep.equal([ 9000 ])
         expect(webService.instance.env).to.deep.equal([ 'PORT=9000', 'NODE_ENV=prod' ])
       })
-
-      // it('should find all related files', () => {
-      //   expect(services).to.have.deep.property('[0].extends.service')
-      //   expect(services).to.have.deep.property('[0].extends.file')
-      //   expect(services).to.have.deep.property('[1].extends.service')
-      //   expect(services).to.have.deep.property('[1].extends.file')
-      //   expect(services[0].extends.service).to.equal('web')
-      //   expect(services[0].extends.file).to.equal('docker-compose.yml')
-      //   expect(services[1].extends.service).to.equal('rethinkdb')
-      //   expect(services[1].extends.file).to.equal('docker-compose.yml')
-      // })
     })
   })
 })
