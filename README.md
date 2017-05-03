@@ -15,6 +15,7 @@ const octobear = require('@runnable/octobear')
 
 octobear.parse({
   dockerComposeFileString: String, // String for `docker-compose.yml`
+  dockerComposeFilePath: String, // Path to the Compose file
   repositoryName: String, // Name or repository. Used for naming the instances (Doesn't have to  correlate 1-to-1)
   ownerUsername: String, // User's github username. Used for pre-instance creation hostname generation
   userContentDomain: String // Runnable API user content domain. Used for pre-instance creation hostname generation
@@ -31,6 +32,10 @@ The response correspond to the following schema:
 			name: String, // Name specified for service in `docker-compose.yml`
 			isMain: Boolean, // Wether this should be the instance for which a repo instance should be created
 		},
+    extends: {
+      service: 'String', // name to the service to extend
+      file: 'String' // path to the compose file where original service is registered
+    }
     // optional
 		code: {
 			repo: 'String', // repo full name

@@ -130,4 +130,90 @@ services:
         })
     })
   })
+
+  describe('#findExtendedFiles', () => {
+    let yml
+    it('should return 2 found files', () => {
+      yml = `
+version: '2'
+services:
+  web:
+    extends:
+       file: common.yml
+  db:
+    image: postgres
+  api:
+    extends:
+       file: base.yml
+`
+      DockerComposeParser.findExtendedFiles(yml)
+      .tap((paths) => {
+        expect(paths.length).to.equal(2)
+        expect(paths[0]).to.equal('common.yml')
+        expect(paths[1]).to.equal('base.yml')
+      })
+    })
+
+    it('should dedupe files', () => {
+      yml = `
+version: '2'
+services:
+  web:
+    extends:
+       file: common.yml
+  db:
+    image: postgres
+  api:
+    extends:
+       file: common.yml
+`
+      DockerComposeParser.findExtendedFiles(yml)
+      .tap((paths) => {
+        expect(paths.length).to.equal(1)
+        expect(paths[0]).to.equal('common.yml')
+      })
+    })
+
+    it('should return empty array if no extends', () => {
+      yml = `
+version: '2'
+services:
+  db:
+    image: postgres
+  api:
+    build: .
+`
+      DockerComposeParser.findExtendedFiles(yml)
+      .tap((paths) => {
+        expect(paths.length).to.equal(0)
+      })
+    })
+  })
+  describe('#_mergeServices', () => {
+    it('should return empty array if empty array was passed', () => {
+      const result = DockerComposeParser._mergeServices([])
+      expect(result.length).to.equal(0)
+    })
+    it('should return warning if parent was not found', () => {
+      const input = [
+        {
+          metadata: {
+            name: 'api'
+          },
+          extends: {
+            service: 'api-base'
+          }
+        }
+      ]
+      const result = DockerComposeParser._mergeServices(input)
+      expect(result.length).to.equal(1)
+      const warnings = result[0].warnings._warnings
+      expect(warnings.length).to.equal(1)
+      expect(warnings[0]).to.deep.equal({
+        serviceName: 'api',
+        parentServiceName: 'api-base',
+        message: 'Parent service is not found'
+      })
+    })
+  })
 })
