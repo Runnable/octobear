@@ -352,6 +352,18 @@ describe('4. Use of env_file', () => {
         expect(services[0].metadata.envFiles).to.deep.equal([ '.env' ])
         expect(services[0].metadata.links).to.deep.equal([ 'db', 'db1' ])
       })
+
+      it('should correctly apply those ENV mappings when provided the files', () => {
+        const envFiles = getAllENVFiles(services[0].metadata.envFiles, repositoryName)
+        return populateENVsFromFiles(services, envFiles)
+          .then(services => {
+            expect(services).to.have.deep.property('[0].instance.env')
+            expect(services[0].instance.env).to.deep.equal([
+              `RETHINKDB=db1`,
+              `DB_PORT=tcp://db:5432`
+            ])
+          })
+      })
     })
   })
 
@@ -393,6 +405,33 @@ describe('4. Use of env_file', () => {
       it('should have the correct metadata for the env files and ENV mappings', () => {
         expect(services[1].metadata.envFiles).to.deep.equal([ 'env/some-environment-name/.env', 'env/some-environment-name/another-env-file.txt' ])
         expect(services[1].metadata.links).to.deep.equal([ 'redis' ])
+      })
+    })
+
+    describe('After Parsing ENVs', () => {
+      before(() => {
+        const envFiles = getAllENVFiles(services[0].metadata.envFiles, repositoryName)
+        return populateENVsFromFiles(services, envFiles)
+          .then(res => {
+            services = res
+          })
+      })
+
+      it('should correctly apply those ENV mappings when provided the files', () => {
+        expect(services).to.have.deep.property('[0].instance.env')
+        expect(services[0].instance.env).to.deep.equal([
+          `ENVIRONMENT=staging`,
+          `RETHINKDB=rethinkdb`,
+          `REDIS=redis`
+        ])
+      })
+
+      it('should correctly apply those ENV mappings when provided the files', () => {
+        expect(services).to.have.deep.property('[0].instance.env')
+        expect(services[1].instance.env).to.deep.equal([
+          `RETHINKDB=rethinkdb`,
+          `REDIS=redis`
+        ])
       })
     })
   })
