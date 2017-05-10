@@ -4,7 +4,6 @@ const { parse, populateENVsFromFiles } = require('index')
 const { expect } = require('chai')
 const fs = require('fs')
 const path = require('path')
-const sanitizeName = require('../util').sanitizeName
 const getDockerFile = require('../util').getDockerFile
 const getComposeFile = require('../util').getComposeFile
 const getAllENVFiles = require('../util').getAllENVFiles
@@ -241,10 +240,9 @@ describe('3. Multiple Instances with linking', () => {
       })
 
       it('should return the correct ENVs', () => {
-        const hostname = `${sanitizeName(repositoryName)}-db-staging-${ownerUsername.toLowerCase()}.${userContentDomain}`
         expect(services).to.have.deep.property('[0].instance.env')
         expect(services[0].instance.env).to.deep.equal([
-          `DB_PORT=tcp://${hostname}:5432`
+          `DB_PORT=tcp://db:5432`
         ])
       })
     })
@@ -282,10 +280,9 @@ describe('3. Multiple Instances with linking', () => {
 
     describe('Main Instance', () => {
       it('should return the correct ENVs', () => {
-        const hostname = `${sanitizeName(repositoryName)}-db-staging-${ownerUsername.toLowerCase()}.${userContentDomain}`
         expect(services).to.have.deep.property('[0].instance.env')
         expect(services[0].instance.env).to.deep.equal([
-          `RETHINKDB=${hostname}`
+          `RETHINKDB=db`
         ])
       })
     })
@@ -309,10 +306,9 @@ describe('3. Multiple Instances with linking', () => {
 
     describe('Main Instance', () => {
       it('should return the correct ENVs', () => {
-        const hostname = `${sanitizeName(repositoryName)}-rethinkdb-staging-${ownerUsername.toLowerCase()}.${userContentDomain}`
         expect(services).to.have.deep.property('[0].instance.env')
         expect(services[0].instance.env).to.deep.equal([
-          `RETHINKDB=${hostname}`,
+          `RETHINKDB=rethinkdb`,
           `REDIS=redis`
         ])
       })
@@ -320,11 +316,10 @@ describe('3. Multiple Instances with linking', () => {
 
     describe('Secondary Instance', () => {
       it('should return the correct ENVs', () => {
-        const hostname = `${sanitizeName(repositoryName)}-redis-staging-${ownerUsername.toLowerCase()}.${userContentDomain}`
         expect(services).to.have.deep.property('[0].instance.env')
         expect(services[1].instance.env).to.deep.equal([
           `RETHINKDB=rethinkdb`,
-          `REDIS=${hostname}`
+          `REDIS=redis`
         ])
       })
     })
@@ -356,20 +351,6 @@ describe('4. Use of env_file', () => {
       it('should have the correct metadata for the env files and ENV mappings', () => {
         expect(services[0].metadata.envFiles).to.deep.equal([ '.env' ])
         expect(services[0].metadata.links).to.deep.equal([ 'db', 'db1' ])
-      })
-
-      it('should correctly apply those ENV mappings when provided the files', () => {
-        const envFiles = getAllENVFiles(services[0].metadata.envFiles, repositoryName)
-        const hostname1 = `${sanitizeName(repositoryName)}-db1-staging-${ownerUsername.toLowerCase()}.${userContentDomain}`
-        const hostname2 = `${sanitizeName(repositoryName)}-db-staging-${ownerUsername.toLowerCase()}.${userContentDomain}`
-        return populateENVsFromFiles(services, envFiles)
-          .then(services => {
-            expect(services).to.have.deep.property('[0].instance.env')
-            expect(services[0].instance.env).to.deep.equal([
-              `RETHINKDB=${hostname1}`,
-              `DB_PORT=tcp://${hostname2}:5432`
-            ])
-          })
       })
     })
   })
@@ -412,35 +393,6 @@ describe('4. Use of env_file', () => {
       it('should have the correct metadata for the env files and ENV mappings', () => {
         expect(services[1].metadata.envFiles).to.deep.equal([ 'env/some-environment-name/.env', 'env/some-environment-name/another-env-file.txt' ])
         expect(services[1].metadata.links).to.deep.equal([ 'redis' ])
-      })
-    })
-
-    describe('After Parsing ENVs', () => {
-      before(() => {
-        const envFiles = getAllENVFiles(services[0].metadata.envFiles, repositoryName)
-        return populateENVsFromFiles(services, envFiles)
-          .then(res => {
-            services = res
-          })
-      })
-
-      it('should correctly apply those ENV mappings when provided the files', () => {
-        const hostname = `${sanitizeName(repositoryName)}-rethinkdb-staging-${ownerUsername.toLowerCase()}.${userContentDomain}`
-        expect(services).to.have.deep.property('[0].instance.env')
-        expect(services[0].instance.env).to.deep.equal([
-          `ENVIRONMENT=staging`,
-          `RETHINKDB=${hostname}`,
-          `REDIS=redis`
-        ])
-      })
-
-      it('should correctly apply those ENV mappings when provided the files', () => {
-        const hostname = `${sanitizeName(repositoryName)}-redis-staging-${ownerUsername.toLowerCase()}.${userContentDomain}`
-        expect(services).to.have.deep.property('[0].instance.env')
-        expect(services[1].instance.env).to.deep.equal([
-          `RETHINKDB=rethinkdb`,
-          `REDIS=${hostname}`
-        ])
       })
     })
   })
@@ -555,14 +507,12 @@ describe('5. Links and aliases', () => {
       })
 
       it('should not replace aliases with hostnames', () => {
-        const hostname1 = `${sanitizeName(repositoryName)}-rethinkdb3-staging-${ownerUsername.toLowerCase()}.${userContentDomain}`
-        const hostname2 = `${sanitizeName(repositoryName)}-rethinkdb4-staging-${ownerUsername.toLowerCase()}.${userContentDomain}`
         expect(services).to.have.deep.property('[0].instance.env')
         expect(services[0].instance.env).to.deep.equal([
           `PORT=3000`,
-          `RETHINKDB_3_1=${hostname1}`,
+          `RETHINKDB_3_1=rethinkdb3`,
           `RETHINKDB_3_2=three-changing-the-weird-host`,
-          `RETHINKDB_4_3=${hostname2}`
+          `RETHINKDB_4_3=rethinkdb4`
         ])
       })
     })
@@ -577,15 +527,13 @@ describe('5. Links and aliases', () => {
       })
 
       it('should not replace aliases with hostnames', () => {
-        const hostname1 = `${sanitizeName(repositoryName)}-rethinkdb3-staging-${ownerUsername.toLowerCase()}.${userContentDomain}`
-        const hostname2 = `${sanitizeName(repositoryName)}-rethinkdb4-staging-${ownerUsername.toLowerCase()}.${userContentDomain}`
         expect(services).to.have.deep.property('[0].instance.env')
         expect(services[0].instance.env).to.deep.equal([
           `PORT=3000`,
-          `RETHINKDB_3_1=${hostname1}`,
+          `RETHINKDB_3_1=rethinkdb3`,
           `RETHINKDB_3_2=three-changing-the-weird-host`,
-          `RETHINKDB_4_3=${hostname2}`,
-          `RETHINKDB_4_1=${hostname2}`,
+          `RETHINKDB_4_3=rethinkdb4`,
+          `RETHINKDB_4_1=rethinkdb4`,
           `RETHINKDB_4_2=three-changing-the-hostname`
         ])
       })
