@@ -292,5 +292,13 @@ describe('Parser', () => {
       const result = Parser.envReplacementParser({ env, hostnames, links: ['rams_db'] })
       expect(result[0]).to.equal(`DB_CONNECTION_STRING=postgresql://uber_db:uber_db@${newHost}:5432/uber_db`)
     })
+
+    it('should not append an trailing slash in http URLs', () => {
+      const env = ['SEARCH_URL=http://search:9200']
+      const newHost = 'compose-test-search-staging-runnabletest.runnable.ninja'
+      const hostnames = { search: newHost }
+      const result = Parser.envReplacementParser({ env, hostnames, links: ['search'] })
+      expect(result[0]).to.equal(`SEARCH_URL=http://${newHost}:9200`)
+    })
   })
 })
