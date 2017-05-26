@@ -66,12 +66,17 @@ The response correspond to the following schema:
 ```
 const octobear = require('@runnable/octobear')
 
-octobear.parse({ ...  })
-.then(({ results: services, envFiles }) =>  {
-  const envFiles = getAllTheseFilesAsHashTable(res.envFiles) // An object with filesnames as keys and strings as values
-  return populateENVsFromFiles(services, envFiles)
+const composeFileAsString = '...'
+octobear.findExtendedFiles(composeFileAsString)
+.then((filesPathes) => {
+  const composeFiles = fethcAllComposeFiles(filesPathes)
+  return octobear.parseAndMergeMultiple({...}, composeFiles, envFiles)
+  .then(({ results: services, envFiles }) =>  {
+    const envFiles = getAllTheseFilesAsHashTable(res.envFiles) // An object with filesnames as keys and strings as values
+    return populateENVsFromFiles(services, envFiles)
+  })
 })
-.then(services => { ... })
+
 ```
 
 ## Tests

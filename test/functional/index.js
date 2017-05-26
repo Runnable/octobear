@@ -780,7 +780,7 @@ describe('6. Build GitHub repos', () => {
       const { dockerComposeFileString } = getComposeFile(repositoryName, 'docker-compose.prod.yml')
       const dockerComposeFileParentResult = getComposeFile(repositoryName, 'docker-compose.yml')
       const dockerComposeFileStringParent = dockerComposeFileParentResult.dockerComposeFileString
-      let services
+      let results
 
       before(() => {
         return parseAndMergeMultiple({ repositoryName, userContentDomain, ownerUsername, scmDomain }, [
@@ -794,16 +794,16 @@ describe('6. Build GitHub repos', () => {
           }
         ])
         .then((result) => {
-          services = result
+          results = result
         })
       })
 
       it('should return 4 instances', () => {
-        expect(services).to.have.lengthOf(4)
+        expect(results.results).to.have.lengthOf(4)
       })
 
       it('should return the correct ports and envs', () => {
-        const webService = services[1]
+        const webService = results.results[1]
         expect(webService.metadata.name).to.equal('web')
         expect(webService.instance.ports).to.deep.equal([ 9000 ])
         expect(webService.instance.env).to.deep.equal([ 'PORT=9000', 'NODE_ENV=prod' ])

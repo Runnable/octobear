@@ -192,7 +192,7 @@ services:
   describe('#_mergeServices', () => {
     it('should return empty array if empty array was passed', () => {
       const result = DockerComposeParser._mergeServices([])
-      expect(result.length).to.equal(0)
+      expect(result.results.length).to.equal(0)
     })
     it('should return warning if parent was not found', () => {
       const input = [
@@ -206,8 +206,8 @@ services:
         }
       ]
       const result = DockerComposeParser._mergeServices(input)
-      expect(result.length).to.equal(1)
-      const warnings = result[0].warnings._warnings
+      expect(result.results.length).to.equal(1)
+      const warnings = result.results[0].warnings._warnings
       expect(warnings.length).to.equal(1)
       expect(warnings[0]).to.deep.equal({
         serviceName: 'api',
