@@ -292,5 +292,17 @@ describe('Parser', () => {
       const result = Parser.envReplacementParser({ env, hostnames, links: ['rams_db'] })
       expect(result[0]).to.equal(`DB_CONNECTION_STRING=postgresql://uber_db:uber_db@${newHost}:5432/uber_db`)
     })
+
+    it('should not append a trailing slash in http URLs or remove an existing one', () => {
+      const env = ['SEARCH_URL=http://search:9200', 'DB_URL=postgres://db:5432', 'ANOTHER_SEARCH=http://search2:9200/']
+      const newSearchHost = 'compose-test-search-staging-runnabletest.runnable.ninja'
+      const newDbHost = 'compose-test-db-staging-runnabletest.runnable.ninja'
+      const newSearch2Host = 'compose-test-search2-staging-runnabletest.runnable.ninja'
+      const hostnames = { search: newSearchHost, db: newDbHost, search2: newSearch2Host }
+      const result = Parser.envReplacementParser({ env, hostnames, links: ['search', 'db', 'search2'] })
+      expect(result[0]).to.equal(`SEARCH_URL=http://${newSearchHost}:9200`)
+      expect(result[1]).to.equal(`DB_URL=postgres://${newDbHost}:5432`)
+      expect(result[2]).to.equal(`ANOTHER_SEARCH=http://${newSearch2Host}:9200/`)
+    })
   })
 })
