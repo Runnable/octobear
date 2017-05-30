@@ -232,6 +232,7 @@ services:
           metadata: {
             name: 'api'
           },
+          extends: {},
           instance: {
             env: ['URL=BASE', 'URL2=BASE']
           }
