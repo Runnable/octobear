@@ -806,7 +806,8 @@ describe('6. Build GitHub repos', () => {
         const webService = results.results[1]
         expect(webService.metadata.name).to.equal('web')
         expect(webService.instance.ports).to.deep.equal([ 9000 ])
-        expect(webService.instance.env).to.deep.equal([ 'PORT=9000', 'NODE_ENV=prod' ])
+        expect(webService.instance.env).to.deep.equal([
+          'RETHINKDB=rethinkdb', 'PORT=9000', 'REDIS_HOST=redis', 'NODE_ENV=prod' ])
       })
     })
   })

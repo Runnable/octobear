@@ -215,5 +215,65 @@ services:
         message: 'Parent service is not found'
       })
     })
+    it('should merge two services', () => {
+      const input = [
+        {
+          metadata: {
+            name: 'api'
+          },
+          extends: {
+            service: 'api'
+          },
+          instance: {
+            env: ['URL=TEST']
+          }
+        },
+        {
+          metadata: {
+            name: 'api'
+          },
+          instance: {
+            env: ['URL=BASE', 'URL2=BASE']
+          }
+        },
+        {
+          metadata: {
+            name: 'web'
+          },
+          instance: {
+            env: ['URL=BASE', 'URL2=BASE']
+          }
+        }
+      ]
+      const result = DockerComposeParser._mergeServices(input)
+      expect(result.results.length).to.equal(2)
+      const api = result.results[0]
+      expect(api).to.deep.equal({
+        'extends': {
+          'service': 'api'
+        },
+        'instance': {
+          'env': [
+            'URL=TEST',
+            'URL2=BASE'
+          ]
+        },
+        'metadata': {
+          'name': 'api'
+        }
+      })
+      const web = result.results[1]
+      expect(web).to.deep.equal({
+        'instance': {
+          'env': [
+            'URL=BASE',
+            'URL2=BASE'
+          ]
+        },
+        'metadata': {
+          'name': 'web'
+        }
+      })
+    })
   })
 })
