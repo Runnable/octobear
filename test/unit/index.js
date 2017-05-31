@@ -219,7 +219,8 @@ services:
       const input = [
         {
           metadata: {
-            name: 'api'
+            name: 'api',
+            isMain: false
           },
           extends: {
             service: 'api'
@@ -230,7 +231,8 @@ services:
         },
         {
           metadata: {
-            name: 'api'
+            name: 'api',
+            isMain: true
           },
           extends: {},
           instance: {
@@ -239,7 +241,8 @@ services:
         },
         {
           metadata: {
-            name: 'web'
+            name: 'web',
+            isMain: false
           },
           instance: {
             env: ['URL=BASE', 'URL2=BASE']
@@ -260,7 +263,8 @@ services:
           ]
         },
         'metadata': {
-          'name': 'api'
+          'name': 'api',
+          'isMain': true
         }
       })
       const web = result.results[1]
@@ -272,7 +276,8 @@ services:
           ]
         },
         'metadata': {
-          'name': 'web'
+          'name': 'web',
+          'isMain': false
         }
       })
     })
