@@ -799,15 +799,19 @@ describe('6. Build GitHub repos', () => {
       })
 
       it('should return 4 instances', () => {
-        expect(results.results).to.have.lengthOf(4)
+        expect(results.results).to.have.lengthOf(3)
       })
 
       it('should return the correct ports and envs', () => {
-        const webService = results.results[1]
+        const webService = results.results[0]
         expect(webService.metadata.name).to.equal('web')
         expect(webService.instance.ports).to.deep.equal([ 9000 ])
         expect(webService.instance.env).to.deep.equal([
           'RETHINKDB=rethinkdb', 'PORT=9000', 'REDIS_HOST=redis', 'NODE_ENV=prod' ])
+        const rethinkService = results.results[1]
+        expect(rethinkService.metadata.name).to.equal('rethinkdb')
+        const redisService = results.results[2]
+        expect(redisService.metadata.name).to.equal('redis')
       })
     })
   })
