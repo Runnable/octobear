@@ -1,6 +1,6 @@
 'use strict'
 require('loadenv')()
-const { parse, populateENVsFromFiles } = require('index')
+const { parse, parseAndMergeMultiple, populateENVsFromFiles } = require('index')
 const { expect } = require('chai')
 const fs = require('fs')
 const path = require('path')
@@ -733,6 +733,85 @@ describe('6. Build GitHub repos', () => {
         expect(services).to.have.deep.property('[0].build.dockerBuildContext')
         expect(services[0].build.dockerFilePath).to.equal('/docker/not-so-dockerfile.Dockerfile')
         expect(services[0].build.dockerBuildContext).to.equal('..')
+      })
+    })
+  })
+  describe('8. Support Extends', () => {
+    describe('8.1: Parse extends', () => {
+      const repositoryName = 'compose-test-repo-8.1'
+      const { dockerComposeFileString } = getComposeFile(repositoryName, 'docker-compose.prod.yml')
+      let services
+
+      before(() => {
+        return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername, scmDomain })
+        .then(({ results: servicesResults }) => {
+          services = servicesResults
+        })
+      })
+
+      it('should return 3 instances', () => {
+        expect(services).to.have.lengthOf(3)
+      })
+
+      it('should return the correct `file` and `service`', () => {
+        expect(services).to.have.deep.property('[0].extends.service')
+        expect(services).to.have.deep.property('[0].extends.file')
+        expect(services).to.have.deep.property('[1].extends.service')
+        expect(services).to.have.deep.property('[1].extends.file')
+        expect(services[0].extends.service).to.equal('web')
+        expect(services[0].extends.file).to.equal('docker-compose.yml')
+        expect(services[1].extends.service).to.equal('rethinkdb')
+        expect(services[1].extends.file).to.equal('docker-compose.yml')
+      })
+
+      it('should find all related files', () => {
+        expect(services).to.have.deep.property('[0].extends.service')
+        expect(services).to.have.deep.property('[0].extends.file')
+        expect(services).to.have.deep.property('[1].extends.service')
+        expect(services).to.have.deep.property('[1].extends.file')
+        expect(services[0].extends.service).to.equal('web')
+        expect(services[0].extends.file).to.equal('docker-compose.yml')
+        expect(services[1].extends.service).to.equal('rethinkdb')
+        expect(services[1].extends.file).to.equal('docker-compose.yml')
+      })
+    })
+    describe('8.1: Parse extends and merge multiple', () => {
+      const repositoryName = 'compose-test-repo-8.1'
+      const { dockerComposeFileString } = getComposeFile(repositoryName, 'docker-compose.prod.yml')
+      const dockerComposeFileParentResult = getComposeFile(repositoryName, 'docker-compose.yml')
+      const dockerComposeFileStringParent = dockerComposeFileParentResult.dockerComposeFileString
+      let results
+
+      before(() => {
+        return parseAndMergeMultiple({ repositoryName, userContentDomain, ownerUsername, scmDomain }, [
+          {
+            dockerComposeFileString: dockerComposeFileString,
+            dockerComposeFilePath: 'docker-compose.prod.yml'
+          },
+          {
+            dockerComposeFileString: dockerComposeFileStringParent,
+            dockerComposeFilePath: 'docker-compose.yml'
+          }
+        ])
+        .then((result) => {
+          results = result
+        })
+      })
+
+      it('should return 4 instances', () => {
+        expect(results.results).to.have.lengthOf(3)
+      })
+
+      it('should return the correct ports and envs', () => {
+        const webService = results.results[0]
+        expect(webService.metadata.name).to.equal('web')
+        expect(webService.instance.ports).to.deep.equal([ 9000 ])
+        expect(webService.instance.env).to.deep.equal([
+          'RETHINKDB=rethinkdb', 'PORT=9000', 'REDIS_HOST=redis', 'NODE_ENV=prod' ])
+        const rethinkService = results.results[1]
+        expect(rethinkService.metadata.name).to.equal('rethinkdb')
+        const redisService = results.results[2]
+        expect(redisService.metadata.name).to.equal('redis')
       })
     })
   })
