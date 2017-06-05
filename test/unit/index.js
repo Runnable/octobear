@@ -191,7 +191,10 @@ services:
   })
   describe('#_mergeServices', () => {
     it('should return an array with default main if empty array was passed', () => {
-      const result = DockerComposeParser._mergeServices([], { repositoryName: 'main' })
+      const result = DockerComposeParser._mergeServices([], {
+        repositoryName: 'main',
+        ownerUsername: 'Runnable',
+        userContentDomain: 'runnable.io' })
       expect(result.results.length).to.equal(1)
       expect(result.results[0].metadata.name).to.equal('main')
     })
@@ -319,7 +322,7 @@ services:
         }
       ]
       const result = DockerComposeParser._mergeServices(input, {
-        repositoryName: 'main'
+        repositoryName: 'main', ownerUsername: 'Runnable', userContentDomain: 'runnable.io'
       })
       expect(result.results.length).to.equal(3)
       const api = result.results[0]
@@ -353,17 +356,20 @@ services:
       })
       const main = result.results[2]
       expect(main).to.deep.equal({
-        'build': {
-          'disabled': true
+        'files': {
+          '/Dockerfile': {
+            'body': '# Image automatically created from docker-compose file\nFROM busybox'
+          }
         },
-        'image': 'busybox',
         'metadata': {
           'name': 'main',
           'isMain': true,
-          'envFiles': []
+          'envFiles': [],
+          'hostname': 'main-staging-runnable.runnable.io'
         },
         'instance': {
-          'env': []
+          'env': [],
+          'name': 'main'
         }
       })
     })
