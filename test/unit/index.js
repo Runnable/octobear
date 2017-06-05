@@ -359,7 +359,11 @@ services:
         'image': 'busybox',
         'metadata': {
           'name': 'main',
-          'isMain': true
+          'isMain': true,
+          'envFiles': []
+        },
+        'instance': {
+          'env': []
         }
       })
     })
