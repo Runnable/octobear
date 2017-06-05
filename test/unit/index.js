@@ -60,43 +60,63 @@ services:
     })
   })
 
-  describe('#_getMainName', () => {
+  describe('#_getMains', () => {
     let services
-    beforeEach(() => {
-      services = {
-        web: {
-          build: 'https://github.com/Runnable/test-compose'
+    const allServices = {
+      web: {
+        metadata: {
+          name: 'web'
         },
-        api: {
-          build: 'git@github.com/Runnable/test-compose'
+        build: {},
+        code: {
+          repo: 'https://github.com/Runnable/test-compose'
+        }
+      },
+      api: {
+        metadata: {
+          name: 'api'
         },
-        api2: {
-          build: '.'
+        build: {},
+        code: {
+          repo: 'git@github.com/Runnable/test-compose'
+        }
+      },
+      api2: {
+        metadata: {
+          name: 'api2'
         },
-        database: {
-          image: 'asdasdasd'
+        build: '.'
+      },
+      database: {
+        metadata: {
+          name: 'database'
         },
-        web2: {
-          build: {
-            context: 'asdassad'
-          }
+        image: 'asdasdasd'
+      },
+      web2: {
+        metadata: {
+          name: 'web2'
+        },
+        build: {
+          context: 'asdassad'
         }
       }
+    }
+    beforeEach(() => {
+      services = [allServices.web, allServices.api, allServices.api2, allServices.web2, allServices.database]
     })
+    let mains
 
-    it('should pick api2 as main', done => {
-      expect(DockerComposeParser._getMainName(services)).to.equal('api2')
+    it('should put web2 and api2 in builds', done => {
+      mains = DockerComposeParser._getMains(services)
+      expect(mains.builds.web2).to.equal(allServices.web2)
+      expect(mains.builds.api2).to.equal(allServices.api2)
       done()
     })
-    it('should pick web2 if api2 isn\'t there', done => {
-      delete services.api2
-      expect(DockerComposeParser._getMainName(services)).to.equal('web2')
-      done()
-    })
-    it('should pick the first github if api2 and web2 aren\'t there', done => {
-      delete services.api2
-      delete services.web2
-      expect(DockerComposeParser._getMainName(services)).to.equal('web')
+    it('should put web and api in externals', done => {
+      mains = DockerComposeParser._getMains(services)
+      expect(mains.externals.web).to.equal(allServices.web)
+      expect(mains.externals.api).to.equal(allServices.api)
       done()
     })
   })
@@ -190,20 +210,11 @@ services:
     })
   })
   describe('#_mergeServices', () => {
-    it('should return an array with default main if empty array was passed', () => {
-      const result = DockerComposeParser._mergeServices([], {
-        repositoryName: 'main',
-        ownerUsername: 'Runnable',
-        userContentDomain: 'runnable.io' })
-      expect(result.results.length).to.equal(1)
-      expect(result.results[0].metadata.name).to.equal('main')
-    })
     it('should return warning if parent was not found', () => {
       const input = [
         {
           metadata: {
-            name: 'api',
-            isMain: true
+            name: 'api'
           },
           extends: {
             service: 'api-base'
@@ -224,8 +235,7 @@ services:
       const input = [
         {
           metadata: {
-            name: 'api',
-            isMain: false
+            name: 'api'
           },
           extends: {
             service: 'api'
@@ -236,9 +246,9 @@ services:
         },
         {
           metadata: {
-            name: 'api',
-            isMain: true
+            name: 'api'
           },
+          build: '.',
           extends: {},
           instance: {
             env: ['URL=BASE', 'URL2=BASE']
@@ -246,8 +256,7 @@ services:
         },
         {
           metadata: {
-            name: 'web',
-            isMain: false
+            name: 'web'
           },
           instance: {
             env: ['URL=BASE', 'URL2=BASE']
@@ -257,7 +266,7 @@ services:
       const result = DockerComposeParser._mergeServices(input, {})
       expect(result.results.length).to.equal(2)
       const api = result.results[0]
-      expect(api).to.deep.equal({
+      const apiResult = {
         'extends': {
           'service': 'api'
         },
@@ -267,11 +276,12 @@ services:
             'URL2=BASE'
           ]
         },
+        build: '.',
         'metadata': {
-          'name': 'api',
-          'isMain': true
+          'name': 'api'
         }
-      })
+      }
+      expect(api).to.deep.equal(apiResult)
       const web = result.results[1]
       expect(web).to.deep.equal({
         'instance': {
@@ -281,97 +291,10 @@ services:
           ]
         },
         'metadata': {
-          'name': 'web',
-          'isMain': false
+          'name': 'web'
         }
       })
-    })
-
-    it('should merge two services and add main', () => {
-      const input = [
-        {
-          metadata: {
-            name: 'api',
-            isMain: false
-          },
-          extends: {
-            service: 'api'
-          },
-          instance: {
-            env: ['URL=TEST']
-          }
-        },
-        {
-          metadata: {
-            name: 'api',
-            isMain: false
-          },
-          extends: {},
-          instance: {
-            env: ['URL=BASE', 'URL2=BASE']
-          }
-        },
-        {
-          metadata: {
-            name: 'web',
-            isMain: false
-          },
-          instance: {
-            env: ['URL=BASE', 'URL2=BASE']
-          }
-        }
-      ]
-      const result = DockerComposeParser._mergeServices(input, {
-        repositoryName: 'main', ownerUsername: 'Runnable', userContentDomain: 'runnable.io'
-      })
-      expect(result.results.length).to.equal(3)
-      const api = result.results[0]
-      expect(api).to.deep.equal({
-        'extends': {
-          'service': 'api'
-        },
-        'instance': {
-          'env': [
-            'URL=TEST',
-            'URL2=BASE'
-          ]
-        },
-        'metadata': {
-          'name': 'api',
-          'isMain': false
-        }
-      })
-      const web = result.results[1]
-      expect(web).to.deep.equal({
-        'instance': {
-          'env': [
-            'URL=BASE',
-            'URL2=BASE'
-          ]
-        },
-        'metadata': {
-          'name': 'web',
-          'isMain': false
-        }
-      })
-      const main = result.results[2]
-      expect(main).to.deep.equal({
-        'files': {
-          '/Dockerfile': {
-            'body': '# Image automatically created from docker-compose file\nFROM busybox'
-          }
-        },
-        'metadata': {
-          'name': 'main',
-          'isMain': true,
-          'envFiles': [],
-          'hostname': 'main-staging-runnable.runnable.io'
-        },
-        'instance': {
-          'env': [],
-          'name': 'main'
-        }
-      })
+      expect(result.mains.builds.api).to.deep.equal(apiResult)
     })
   })
 })
