@@ -190,15 +190,17 @@ services:
     })
   })
   describe('#_mergeServices', () => {
-    it('should return empty array if empty array was passed', () => {
-      const result = DockerComposeParser._mergeServices([], {})
-      expect(result.results.length).to.equal(0)
+    it('should return an array with default main if empty array was passed', () => {
+      const result = DockerComposeParser._mergeServices([], { repositoryName: 'main' })
+      expect(result.results.length).to.equal(1)
+      expect(result.results[0].metadata.name).to.equal('main')
     })
     it('should return warning if parent was not found', () => {
       const input = [
         {
           metadata: {
-            name: 'api'
+            name: 'api',
+            isMain: true
           },
           extends: {
             service: 'api-base'
@@ -278,6 +280,86 @@ services:
         'metadata': {
           'name': 'web',
           'isMain': false
+        }
+      })
+    })
+
+    it('should merge two services and add main', () => {
+      const input = [
+        {
+          metadata: {
+            name: 'api',
+            isMain: false
+          },
+          extends: {
+            service: 'api'
+          },
+          instance: {
+            env: ['URL=TEST']
+          }
+        },
+        {
+          metadata: {
+            name: 'api',
+            isMain: false
+          },
+          extends: {},
+          instance: {
+            env: ['URL=BASE', 'URL2=BASE']
+          }
+        },
+        {
+          metadata: {
+            name: 'web',
+            isMain: false
+          },
+          instance: {
+            env: ['URL=BASE', 'URL2=BASE']
+          }
+        }
+      ]
+      const result = DockerComposeParser._mergeServices(input, {
+        repositoryName: 'main'
+      })
+      expect(result.results.length).to.equal(3)
+      const api = result.results[0]
+      expect(api).to.deep.equal({
+        'extends': {
+          'service': 'api'
+        },
+        'instance': {
+          'env': [
+            'URL=TEST',
+            'URL2=BASE'
+          ]
+        },
+        'metadata': {
+          'name': 'api',
+          'isMain': false
+        }
+      })
+      const web = result.results[1]
+      expect(web).to.deep.equal({
+        'instance': {
+          'env': [
+            'URL=BASE',
+            'URL2=BASE'
+          ]
+        },
+        'metadata': {
+          'name': 'web',
+          'isMain': false
+        }
+      })
+      const main = result.results[2]
+      expect(main).to.deep.equal({
+        'build': {
+          'disabled': true
+        },
+        'image': 'busybox',
+        'metadata': {
+          'name': 'main',
+          'isMain': true
         }
       })
     })
