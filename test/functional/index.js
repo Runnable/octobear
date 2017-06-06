@@ -612,21 +612,21 @@ describe('6. Build GitHub repos', () => {
     it('should return the correct `dockerFilePath` and no `dockerBuildContext`', () => {
       expect(services).to.have.deep.property('[0].build.dockerFilePath')
       expect(services).to.not.have.deep.property('[0].build.dockerBuildContext')
-      expect(services[ 0 ].build.dockerFilePath).to.equal('/Dockerfile')
-      expect(services[ 0 ].build.dockerBuildContext).to.equal(undefined)
+      expect(services[0].build.dockerFilePath).to.equal('/Dockerfile')
+      expect(services[0].build.dockerBuildContext).to.equal(undefined)
     })
 
     it('should return the correct `code`', () => {
       expect(services).to.have.deep.property('[0].code')
-      expect(services[ 0 ].code.repo).to.equal('RunnableTest/node-starter')
-      expect(services[ 0 ].code.commitish).to.equal(undefined)
+      expect(services[0].code.repo).to.equal('RunnableTest/node-starter')
+      expect(services[0].code.commitish).to.equal(undefined)
     })
 
     it('should return the correct ports', () => {
       expect(services).to.have.deep.property('[0].instance.ports')
-      expect(services[ 0 ].instance.ports).to.be.an.array
-      expect(services[ 0 ].instance.ports[ 0 ]).to.be.a.number
-      expect(services[ 0 ].instance.ports[ 0 ]).to.equal(7890)
+      expect(services[0].instance.ports).to.be.an.array
+      expect(services[0].instance.ports[0]).to.be.a.number
+      expect(services[0].instance.ports[0]).to.equal(7890)
     })
   })
   describe('6.2: Build from GitHub Repo with commitish', () => {
@@ -648,21 +648,21 @@ describe('6. Build GitHub repos', () => {
     it('should return the correct `dockerFilePath` and no `dockerBuildContext`', () => {
       expect(services).to.have.deep.property('[0].build.dockerFilePath')
       expect(services).to.not.have.deep.property('[0].build.dockerBuildContext')
-      expect(services[ 0 ].build.dockerFilePath).to.equal('/Dockerfile')
-      expect(services[ 0 ].build.dockerBuildContext).to.equal(undefined)
+      expect(services[0].build.dockerFilePath).to.equal('/Dockerfile')
+      expect(services[0].build.dockerBuildContext).to.equal(undefined)
     })
 
     it('should return the correct `code`', () => {
       expect(services).to.have.deep.property('[0].code')
-      expect(services[ 0 ].code.repo).to.equal('RunnableTest/node-starter')
-      expect(services[ 0 ].code.commitish).to.equal('dark-theme')
+      expect(services[0].code.repo).to.equal('RunnableTest/node-starter')
+      expect(services[0].code.commitish).to.equal('dark-theme')
     })
 
     it('should return the correct ports', () => {
       expect(services).to.have.deep.property('[0].instance.ports')
-      expect(services[ 0 ].instance.ports).to.be.an.array
-      expect(services[ 0 ].instance.ports[ 0 ]).to.be.a.number
-      expect(services[ 0 ].instance.ports[ 0 ]).to.equal(7890)
+      expect(services[0].instance.ports).to.be.an.array
+      expect(services[0].instance.ports[0]).to.be.a.number
+      expect(services[0].instance.ports[0]).to.equal(7890)
     })
   })
 
