@@ -699,7 +699,7 @@ describe('6. Build GitHub repos', () => {
       expect(Object.keys(mains.externals)).to.have.lengthOf(1)
     })
 
-    it('should set api to isMain', () => {
+    it('should add api to mains.builds', () => {
       const api = services.find(service => service.metadata.name === 'api')
       expect(mains.builds).to.have.deep.property(api.metadata.name, api)
     })
