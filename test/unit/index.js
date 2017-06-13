@@ -2,6 +2,7 @@
 
 const { expect } = require('chai')
 const DockerComposeParser = require('index')
+const sinon = require('sinon')
 
 describe('Index', () => {
   describe('#_parseDockerComposeFile', () => {
@@ -62,6 +63,7 @@ services:
 
   describe('#_getMains', () => {
     let services
+    let opts
     const allServices = {
       web: {
         metadata: {
@@ -103,20 +105,35 @@ services:
       }
     }
     beforeEach(() => {
+      sinon.stub(DockerComposeParser, 'addMainIfMissing').returns()
       services = [allServices.web, allServices.api, allServices.api2, allServices.web2, allServices.database]
+      opts = {
+        skipMissingMainCheck: true
+      }
+    })
+
+    afterEach(() => {
+      DockerComposeParser.addMainIfMissing.restore()
     })
     let mains
 
     it('should put web2 and api2 in builds', done => {
-      mains = DockerComposeParser._getMains(services)
+      mains = DockerComposeParser._getMains(services, opts)
       expect(mains.builds.web2).to.equal(allServices.web2)
       expect(mains.builds.api2).to.equal(allServices.api2)
       done()
     })
     it('should put web and api in externals', done => {
-      mains = DockerComposeParser._getMains(services)
+      mains = DockerComposeParser._getMains(services, opts)
       expect(mains.externals.web).to.equal(allServices.web)
       expect(mains.externals.api).to.equal(allServices.api)
+      done()
+    })
+    it('should call addMainIfMissing is skipMissingMainCheck is true', done => {
+      opts.skipMissingMainCheck = false
+      mains = DockerComposeParser._getMains(services, opts)
+      sinon.assert.calledOnce(DockerComposeParser.addMainIfMissing)
+      sinon.assert.calledWith(DockerComposeParser.addMainIfMissing, services, mains, opts)
       done()
     })
   })
@@ -216,6 +233,7 @@ services:
           metadata: {
             name: 'api'
           },
+          build: '.',
           extends: {
             service: 'api-base'
           }
