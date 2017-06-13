@@ -138,7 +138,7 @@ services:
     })
   })
 
-  describe.only('#addMainIfMissing', () => {
+  describe('#addMainIfMissing', () => {
     let opts
     const services = []
     const repoName = 'hello'
@@ -161,11 +161,6 @@ services:
       }
     }
     let noMains
-    const someMains2 = {
-      builds: {
-        api2: allServices.api2
-      }
-    }
     beforeEach(() => {
       noMains = {
         builds: {},
@@ -183,7 +178,6 @@ services:
     afterEach(() => {
       DockerComposeParser._populateHostname.restore()
     })
-    let mains
 
     it('should skip everything with at least 1 main (builds)', done => {
       const someMains = {
@@ -191,7 +185,7 @@ services:
           web: allServices.web
         }
       }
-      mains = DockerComposeParser.addMainIfMissing(services, someMains, opts)
+      DockerComposeParser.addMainIfMissing(services, someMains, opts)
       expect(someMains.builds[repoName]).to.not.be.an('object')
       sinon.assert.notCalled(DockerComposeParser._populateHostname)
       done()
@@ -202,19 +196,19 @@ services:
           web: allServices.web
         }
       }
-      mains = DockerComposeParser.addMainIfMissing(services, someMains, opts)
+      DockerComposeParser.addMainIfMissing(services, someMains, opts)
       expect(someMains.builds[repoName]).to.not.be.an('object')
       sinon.assert.notCalled(DockerComposeParser._populateHostname)
       done()
     })
     it('should add new main when none given', done => {
-      mains = DockerComposeParser.addMainIfMissing(services, noMains, opts)
+      DockerComposeParser.addMainIfMissing(services, noMains, opts)
       expect(noMains.builds[repoName]).to.be.an('object')
       expect(services[0]).to.be.an('object')
       done()
     })
     it('should call _populateHostname when no mains given', done => {
-      mains = DockerComposeParser.addMainIfMissing(services, noMains, opts)
+      DockerComposeParser.addMainIfMissing(services, noMains, opts)
       sinon.assert.calledOnce(DockerComposeParser._populateHostname)
       sinon.assert.calledWith(DockerComposeParser._populateHostname, sinon.match.object, ownerUsername, userContentDomain)
       done()
