@@ -205,6 +205,7 @@ services:
       DockerComposeParser.addMainIfMissing(services, noMains, opts)
       expect(noMains.builds[repoName]).to.be.an('object')
       expect(services[0]).to.be.an('object')
+      expect(services[0].metadata.isMissingMaster).to.be.true
       done()
     })
     it('should call _populateHostname when no mains given', done => {
