@@ -27,37 +27,42 @@ The response correspond to the following schema:
 
 ```
 {
-	results: [{
-		metadata: {
-			name: String, // Name specified for service in `docker-compose.yml`
-			isMain: Boolean, // Wether this should be the instance for which a repo instance should be created
-		},
+  results: [{
+    metadata: {
+      name: String, // Name specified for service in `docker-compose.yml`
+    },
     extends: {
       service: 'String', // name to the service to extend
       file: 'String' // path to the compose file where original service is registered
-    }
-    // optional
-		code: {
-			repo: 'String', // repo full name
-                        commitish: 'String' // Optional. Commit or branch
-		}),
+    },
+    code: { // optional
+      repo: 'String', // repo full name
+      commitish: 'String' // Optional. Commit or branch
+    }),
     build: {
       dockerFilePath: String, // Optional. Path for Dockerfile used to build instance,
       dockerBuildContext: String, // Optional. Path for Docker build context
     },
-		files: { // Optional
-		 '/Dockerfile': {
-				body: String // Body for Dockerfile to be used. Only specified if there is  no `buildDockerfilePath`
-			}
-		},
-		instance: {
-			name: String, // Instance name. Different from name specified in `docker-compose.yml`,
-			containerStartCommand: String, // Optional. Command provided to start instance
-			ports: Array<Number>, // Array of number for ports
-			env: Array<String> // Array of strings for env variables. Includes hostname substitution
-		}
-	}]
-  envFiles: [String] // Array of all ENV files that should be loaded
+    files: { // Optional
+      '/Dockerfile': {
+      body: String // Body for Dockerfile to be used. Only specified if there is  no `buildDockerfilePath`			}
+    },
+    instance: {
+      name: String, // Instance name. Different from name specified in `docker-compose.yml`,
+      containerStartCommand: String, // Optional. Command provided to start instance
+      ports: Array<Number>, // Array of number for ports
+      env: Array<String> // Array of strings for env variables. Includes hostname substitution
+    } 
+  }],
+  envFiles: [String] // Array of all ENV files that should be loaded,
+  mains: {
+    builds: { // includes all built main
+      {serviceName}: result {value in results for this}
+    },
+    externals: {
+      {serviceName}: results {value in results for this}
+    }
+  }
 }
 ```
 

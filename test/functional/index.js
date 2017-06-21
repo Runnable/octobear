@@ -169,8 +169,9 @@ describe('2. Instance with Image', () => {
     })
 
     it('should not return a `dockerBuildPath` on either', () => {
-      expect(services[0]).to.not.have.property('buildDockerfilePath')
-      expect(services[1]).to.not.have.property('buildDockerfilePath')
+      services.forEach(service => {
+        expect(service).to.not.have.property('buildDockerfilePath')
+      })
     })
 
     it('should return a `files` object for the normal entry', () => {
@@ -211,11 +212,13 @@ describe('3. Multiple Instances with linking', () => {
     const repositoryName = 'compose-test-repo-3.1'
     const { dockerComposeFileString } = getDockerFile(repositoryName)
     let services
+    let mains
 
     before(() => {
       return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername, scmDomain })
-      .then(({ results: servicesResults }) => {
-        services = servicesResults
+      .then((results) => {
+        services = results.results
+        mains = results.mains
       })
     })
 
@@ -223,9 +226,13 @@ describe('3. Multiple Instances with linking', () => {
       expect(services).to.have.lengthOf(2)
     })
 
+    it('should have 1 main', () => {
+      expect(Object.keys(mains.builds)).to.have.lengthOf(1)
+    })
+
     describe('Main Instance', () => {
       it('should have a `main` container', () => {
-        expect(services).to.have.deep.property('[0].metadata.isMain', true)
+        expect(mains.builds).to.have.deep.property(services[0].metadata.name, services[0])
       })
 
       it('should return a `dockerFilePath` and `dockerBuildContext`', () => {
@@ -251,7 +258,7 @@ describe('3. Multiple Instances with linking', () => {
 
     describe('Secondary Instance', () => {
       it('should not a be a `main` container', () => {
-        expect(services).to.have.deep.property('[1].metadata.isMain', false)
+        expect(mains.builds).to.not.have.deep.property(services[1].metadata.name)
       })
 
       it('should have the required files', () => {
@@ -601,9 +608,9 @@ describe('6. Build GitHub repos', () => {
 
     before(() => {
       return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername, scmDomain })
-      .then(({ results: servicesResults }) => {
-        services = servicesResults
-      })
+        .then((results) => {
+          services = results.results
+        })
     })
 
     it('should return one instance', () => {
@@ -637,9 +644,9 @@ describe('6. Build GitHub repos', () => {
 
     before(() => {
       return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername, scmDomain })
-      .then(({ results: servicesResults }) => {
-        services = servicesResults
-      })
+        .then((results) => {
+          services = results.results
+        })
     })
 
     it('should return one instance', () => {
@@ -671,11 +678,13 @@ describe('6. Build GitHub repos', () => {
     const repositoryName = 'compose-test-repo-6.3'
     const { dockerComposeFileString } = getDockerFile(repositoryName)
     let services
+    let mains
 
     before(() => {
       return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername, scmDomain })
-        .then(({ results: servicesResults }) => {
-          services = servicesResults
+        .then((results) => {
+          services = results.results
+          mains = results.mains
         })
     })
 
@@ -683,136 +692,143 @@ describe('6. Build GitHub repos', () => {
       expect(services).to.have.lengthOf(2)
     })
 
-    it('should set api to isMain', () => {
+    it('should have 1 main', () => {
+      expect(Object.keys(mains.builds)).to.have.lengthOf(1)
+    })
+    it('should have 1 externals', () => {
+      expect(Object.keys(mains.externals)).to.have.lengthOf(1)
+    })
+
+    it('should add api to mains.builds', () => {
       const api = services.find(service => service.metadata.name === 'api')
-      expect(api).to.have.deep.property('metadata.isMain', true)
+      expect(mains.builds).to.have.deep.property(api.metadata.name, api)
     })
   })
-  describe('7. Support Build Contexts', () => {
-    describe('7.1: Compose in root and Dockerfile in folder', () => {
-      const repositoryName = 'compose-test-repo-7.1'
-      const { dockerComposeFileString } = getDockerFile(repositoryName)
-      let services
+})
+describe('7. Support Build Contexts', () => {
+  describe('7.1: Compose in root and Dockerfile in folder', () => {
+    const repositoryName = 'compose-test-repo-7.1'
+    const { dockerComposeFileString } = getDockerFile(repositoryName)
+    let services
 
-      before(() => {
-        return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername, scmDomain })
-        .then(({ results: servicesResults }) => {
-          services = servicesResults
-        })
-      })
-
-      it('should return one instance', () => {
-        expect(services).to.have.lengthOf(1)
-      })
-
-      it('should return the correct `dockerFilePath` and `dockerBuildContext`', () => {
-        expect(services).to.have.deep.property('[0].build.dockerFilePath')
-        expect(services).to.have.deep.property('[0].build.dockerBuildContext')
-        expect(services[0].build.dockerFilePath).to.equal('/docker/not-so-dockerfile.Dockerfile')
-        expect(services[0].build.dockerBuildContext).to.equal('.')
+    before(() => {
+      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername, scmDomain })
+      .then(({ results: servicesResults }) => {
+        services = servicesResults
       })
     })
-    describe('7.2: Compose and Dockerfile are in different subfolders', () => {
-      const repositoryName = 'compose-test-repo-7.2'
-      const { dockerComposeFileString } = getComposeFile(repositoryName, 'src/docker-compose.yml')
-      let services
 
-      before(() => {
-        return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername, scmDomain })
-        .then(({ results: servicesResults }) => {
-          services = servicesResults
-        })
-      })
+    it('should return one instance', () => {
+      expect(services).to.have.lengthOf(1)
+    })
 
-      it('should return one instance', () => {
-        expect(services).to.have.lengthOf(1)
-      })
-
-      it('should return the correct `dockerFilePath` and `dockerBuildContext`', () => {
-        expect(services).to.have.deep.property('[0].build.dockerFilePath')
-        expect(services).to.have.deep.property('[0].build.dockerBuildContext')
-        expect(services[0].build.dockerFilePath).to.equal('/docker/not-so-dockerfile.Dockerfile')
-        expect(services[0].build.dockerBuildContext).to.equal('..')
-      })
+    it('should return the correct `dockerFilePath` and `dockerBuildContext`', () => {
+      expect(services).to.have.deep.property('[0].build.dockerFilePath')
+      expect(services).to.have.deep.property('[0].build.dockerBuildContext')
+      expect(services[0].build.dockerFilePath).to.equal('/docker/not-so-dockerfile.Dockerfile')
+      expect(services[0].build.dockerBuildContext).to.equal('.')
     })
   })
-  describe('8. Support Extends', () => {
-    describe('8.1: Parse extends', () => {
-      const repositoryName = 'compose-test-repo-8.1'
-      const { dockerComposeFileString } = getComposeFile(repositoryName, 'docker-compose.prod.yml')
-      let services
+  describe('7.2: Compose and Dockerfile are in different subfolders', () => {
+    const repositoryName = 'compose-test-repo-7.2'
+    const { dockerComposeFileString } = getComposeFile(repositoryName, 'src/docker-compose.yml')
+    let services
 
-      before(() => {
-        return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername, scmDomain })
-        .then(({ results: servicesResults }) => {
-          services = servicesResults
-        })
-      })
-
-      it('should return 3 instances', () => {
-        expect(services).to.have.lengthOf(3)
-      })
-
-      it('should return the correct `file` and `service`', () => {
-        expect(services).to.have.deep.property('[0].extends.service')
-        expect(services).to.have.deep.property('[0].extends.file')
-        expect(services).to.have.deep.property('[1].extends.service')
-        expect(services).to.have.deep.property('[1].extends.file')
-        expect(services[0].extends.service).to.equal('web')
-        expect(services[0].extends.file).to.equal('docker-compose.yml')
-        expect(services[1].extends.service).to.equal('rethinkdb')
-        expect(services[1].extends.file).to.equal('docker-compose.yml')
-      })
-
-      it('should find all related files', () => {
-        expect(services).to.have.deep.property('[0].extends.service')
-        expect(services).to.have.deep.property('[0].extends.file')
-        expect(services).to.have.deep.property('[1].extends.service')
-        expect(services).to.have.deep.property('[1].extends.file')
-        expect(services[0].extends.service).to.equal('web')
-        expect(services[0].extends.file).to.equal('docker-compose.yml')
-        expect(services[1].extends.service).to.equal('rethinkdb')
-        expect(services[1].extends.file).to.equal('docker-compose.yml')
+    before(() => {
+      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername, scmDomain })
+      .then(({ results: servicesResults }) => {
+        services = servicesResults
       })
     })
-    describe('8.1: Parse extends and merge multiple', () => {
-      const repositoryName = 'compose-test-repo-8.1'
-      const { dockerComposeFileString } = getComposeFile(repositoryName, 'docker-compose.prod.yml')
-      const dockerComposeFileParentResult = getComposeFile(repositoryName, 'docker-compose.yml')
-      const dockerComposeFileStringParent = dockerComposeFileParentResult.dockerComposeFileString
-      let results
 
-      before(() => {
-        return parseAndMergeMultiple({ repositoryName, userContentDomain, ownerUsername, scmDomain }, [
-          {
-            dockerComposeFileString: dockerComposeFileString,
-            dockerComposeFilePath: 'docker-compose.prod.yml'
-          },
-          {
-            dockerComposeFileString: dockerComposeFileStringParent,
-            dockerComposeFilePath: 'docker-compose.yml'
-          }
-        ])
-        .then((result) => {
-          results = result
-        })
-      })
+    it('should return one instance', () => {
+      expect(services).to.have.lengthOf(1)
+    })
 
-      it('should return 4 instances', () => {
-        expect(results.results).to.have.lengthOf(3)
-      })
+    it('should return the correct `dockerFilePath` and `dockerBuildContext`', () => {
+      expect(services).to.have.deep.property('[0].build.dockerFilePath')
+      expect(services).to.have.deep.property('[0].build.dockerBuildContext')
+      expect(services[0].build.dockerFilePath).to.equal('/docker/not-so-dockerfile.Dockerfile')
+      expect(services[0].build.dockerBuildContext).to.equal('..')
+    })
+  })
+})
+describe('8. Support Extends', () => {
+  describe('8.1: Parse extends', () => {
+    const repositoryName = 'compose-test-repo-8.1'
+    const { dockerComposeFileString } = getComposeFile(repositoryName, 'docker-compose.prod.yml')
+    let services
 
-      it('should return the correct ports and envs', () => {
-        const webService = results.results[0]
-        expect(webService.metadata.name).to.equal('web')
-        expect(webService.instance.ports).to.deep.equal([ 9000 ])
-        expect(webService.instance.env).to.deep.equal([
-          'RETHINKDB=rethinkdb', 'PORT=9000', 'REDIS_HOST=redis', 'NODE_ENV=prod' ])
-        const rethinkService = results.results[1]
-        expect(rethinkService.metadata.name).to.equal('rethinkdb')
-        const redisService = results.results[2]
-        expect(redisService.metadata.name).to.equal('redis')
+    before(() => {
+      return parse({ dockerComposeFileString, repositoryName, userContentDomain, ownerUsername, scmDomain })
+      .then(({ results: servicesResults }) => {
+        services = servicesResults
       })
+    })
+
+    it('should return 3 instances', () => {
+      expect(services).to.have.lengthOf(3)
+    })
+
+    it('should return the correct `file` and `service`', () => {
+      expect(services).to.have.deep.property('[0].extends.service')
+      expect(services).to.have.deep.property('[0].extends.file')
+      expect(services).to.have.deep.property('[1].extends.service')
+      expect(services).to.have.deep.property('[1].extends.file')
+      expect(services[0].extends.service).to.equal('web')
+      expect(services[0].extends.file).to.equal('docker-compose.yml')
+      expect(services[1].extends.service).to.equal('rethinkdb')
+      expect(services[1].extends.file).to.equal('docker-compose.yml')
+    })
+
+    it('should find all related files', () => {
+      expect(services).to.have.deep.property('[0].extends.service')
+      expect(services).to.have.deep.property('[0].extends.file')
+      expect(services).to.have.deep.property('[1].extends.service')
+      expect(services).to.have.deep.property('[1].extends.file')
+      expect(services[0].extends.service).to.equal('web')
+      expect(services[0].extends.file).to.equal('docker-compose.yml')
+      expect(services[1].extends.service).to.equal('rethinkdb')
+      expect(services[1].extends.file).to.equal('docker-compose.yml')
+    })
+  })
+  describe('8.1: Parse extends and merge multiple', () => {
+    const repositoryName = 'compose-test-repo-8.1'
+    const { dockerComposeFileString } = getComposeFile(repositoryName, 'docker-compose.prod.yml')
+    const dockerComposeFileParentResult = getComposeFile(repositoryName, 'docker-compose.yml')
+    const dockerComposeFileStringParent = dockerComposeFileParentResult.dockerComposeFileString
+    let results
+
+    before(() => {
+      return parseAndMergeMultiple({ repositoryName, userContentDomain, ownerUsername, scmDomain }, [
+        {
+          dockerComposeFileString: dockerComposeFileString,
+          dockerComposeFilePath: 'docker-compose.prod.yml'
+        },
+        {
+          dockerComposeFileString: dockerComposeFileStringParent,
+          dockerComposeFilePath: 'docker-compose.yml'
+        }
+      ])
+      .then((result) => {
+        results = result
+      })
+    })
+
+    it('should return 3 instances', () => {
+      expect(results.results).to.have.lengthOf(3)
+    })
+
+    it('should return the correct ports and envs', () => {
+      const webService = results.results[0]
+      expect(webService.metadata.name).to.equal('web')
+      expect(webService.instance.ports).to.deep.equal([ 9000 ])
+      expect(webService.instance.env).to.deep.equal([
+        'RETHINKDB=rethinkdb', 'PORT=9000', 'REDIS_HOST=redis', 'NODE_ENV=prod' ])
+      const rethinkService = results.results[1]
+      expect(rethinkService.metadata.name).to.equal('rethinkdb')
+      const redisService = results.results[2]
+      expect(redisService.metadata.name).to.equal('redis')
     })
   })
 })
