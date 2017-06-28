@@ -16,7 +16,7 @@ describe('Util', () => {
         })
     })
 
-    it('should not throwo an error if the schema is valid', done => {
+    it('should not throw an error if the schema is valid', done => {
       Utils.validate(schema, { name: 'world' })
         .asCallback(err => {
           expect(err).not.to.exist
