@@ -1,17 +1,20 @@
 # Full list of versions available here: https://registry.hub.docker.com/_/node/tags/manage/\n' +
-FROM node:argon
+FROM node:boron
 
 # Add repository files to container
 
 #Start: Main Repository
-ADD ["./octobear", "/octobear"]
-WORKDIR /octobear
-RUN git submodule update --init --recursive
+ADD "./package.json" "/app/package.json"
+WORKDIR /app
 RUN npm install
+
+ADD "./.git" "/app/.git"
+ADD "./.gitmodules" "/app/.gitmodules"
+RUN git submodule update --init --recursive
 #End
 
-WORKDIR /octobear
-
+WORKDIR /app
+ADD "./" "/app"
 # Open up ports on the container
 EXPOSE 3000
 
