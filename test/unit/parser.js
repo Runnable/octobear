@@ -54,7 +54,7 @@ describe('Parser', () => {
       expect(result.dockerBuildContext).to.equal(undefined)
     })
 
-    it('should return full url for non supported scm doman', () => {
+    it('should return full url for non supported scm domain', () => {
       build = 'git@github.com/DockerCon2017/api.git'
       scmDomain = 'bitbucket.org'
       const result = Parser.dockerBuildParser({ build, scmDomain, warnings })
